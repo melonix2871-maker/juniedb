@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenosDB Control • P2P Database Interface</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for simple visual (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #f6f8fc;
+            color: #1a2639;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* main card */
+        .app-container {
+            max-width: 1440px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 30px 60px rgba(0, 10, 30, 0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(2px);
+        }
+
+        /* header */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 32px;
+            border-bottom: 1px solid #eef2f6;
+            background: rgba(255,255,255,0.7);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            background: #1e2b4f;
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+            font-weight: 600;
+            box-shadow: 0 8px 16px -8px rgba(0,40,100,0.3);
+        }
+
+        .logo-text h2 {
+            font-weight: 600;
+            font-size: 1.4rem;
+            letter-spacing: -0.02em;
+            color: #111c36;
+        }
+        .logo-text span {
+            font-size: 0.8rem;
+            color: #4e5e7b;
+            background: #edf2f9;
+            padding: 4px 8px;
+            border-radius: 40px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .badge {
+            background: #e9ecf3;
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1f2b48;
+        }
+        .badge i {
+            color: #2b3d6d;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #cdd9e9;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #1f2b48;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-outline:hover {
+            background: #f0f4fe;
+            border-color: #2b3d6d;
+        }
+
+        /* main layout */
+        .dashboard-grid {
+            display: flex;
+            min-height: 700px;
+        }
+
+        /* sidebar */
+        .sidebar {
+            width: 280px;
+            background: #f9fbfe;
+            border-right: 1px solid #e6ecf3;
+            padding: 28px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            border-radius: 16px;
+            color: #405479;
+            font-weight: 500;
+            transition: 0.15s;
+            cursor: pointer;
+        }
+        .nav-item i {
+            width: 24px;
+            font-size: 1.2rem;
+            color: #556b93;
+        }
+        .nav-item.active {
+            background: #e1e9f5;
+            color: #0a1c3a;
+            font-weight: 600;
+        }
+        .nav-item.active i {
+            color: #0a1c3a;
+        }
+        .nav-item:not(.active):hover {
+            background: #edf2f9;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px dashed #d0ddeb;
+            padding-top: 24px;
+        }
+
+        /* main content */
+        .content-panel {
+            flex: 1;
+            background: white;
+            padding: 32px 36px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #0f1c3d;
+            margin-bottom: 6px;
+        }
+        .section-desc {
+            color: #5f6f8c;
+            margin-bottom: 32px;
+            border-left: 4px solid #b5c9e6;
+            padding-left: 18px;
+            background: #f8fafd;
+            border-radius: 0 12px 12px 0;
+            line-height: 1.4;
+            font-size: 0.95rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 36px;
+        }
+
+        .stat-card {
+            background: #f7f9fd;
+            border-radius: 24px;
+            padding: 22px 20px;
+            border: 1px solid #eef2f8;
+            box-shadow: 0 6px 12px -10px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        .stat-card:hover {
+            background: #ffffff;
+            border-color: #cbd6e8;
+            box-shadow: 0 15px 25px -18px #1f3750;
+        }
+        .stat-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #61799e;
+            margin-bottom: 8px;
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #0e2348;
+        }
+        .stat-footer {
+            margin-top: 12px;
+            color: #2f4570;
+            font-size: 0.85rem;
+        }
+
+        .setting-group {
+            background: #fafcff;
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid #e2eaf3;
+            margin-bottom: 28px;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 24px;
+            margin-top: 18px;
+        }
+        .input-field {
+            background: white;
+            border: 1px solid #dae2ed;
+            border-radius: 60px;
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            width: 260px;
+            transition: 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #1e3f76;
+            box-shadow: 0 0 0 3px rgba(20,60,140,0.1);
+        }
+        .btn-primary {
+            background: #0d244b;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 16px -12px #04142b;
+        }
+        .btn-primary:hover {
+            background: #1b3562;
+            transform: scale(1.01);
+        }
+        .btn-secondary {
+            background: white;
+            border: 1px solid #bfd0e6;
+            color: #1c345a;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .api-key-box {
+            background: #0e1b2f;
+            color: #c4dcff;
+            padding: 16px 22px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 18px 0;
+            border: 1px solid #2c4065;
+        }
+        .copy-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .tag {
+            background: #dde5f2;
+            color: #1c2e55;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        hr {
+            border: none;
+            border-top: 2px solid #eef3fa;
+            margin: 28px 0;
+        }
+        /* demo table */
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fbfdff;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .api-table th {
+            text-align: left;
+            padding: 16px 12px;
+            background: #eef4fb;
+            color: #1f3a6b;
+            font-weight: 600;
+        }
+        .api-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e2e9f3;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="appContainer">
+    <!-- top bar with dynamic auth -->
+    <div class="top-bar">
+        <div class="logo-area">
+            <div class="logo-icon">G</div>
+            <div class="logo-text">
+                <h2>genosDB <span>P2P • BETA</span></h2>
+            </div>
+        </div>
+        <div class="auth-status" id="authStatusBar">
+            <!-- dynamically updated by js -->
+        </div>
+    </div>
+
+    <!-- main -->
+    <div class="dashboard-grid">
+        <!-- sidebar navigation -->
+        <div class="sidebar">
+            <div class="nav-item active" data-section="overview"><i class="fas fa-chart-pie"></i> Overview</div>
+            <div class="nav-item" data-section="auth"><i class="fas fa-lock"></i> Authentication</div>
+            <div class="nav-item" data-section="superadmin"><i class="fas fa-crown"></i> Superadmin</div>
+            <div class="nav-item" data-section="apikeys"><i class="fas fa-key"></i> API & Access</div>
+            <div class="nav-item" data-section="rtc"><i class="fas fa-bolt"></i> genusRTC</div>
+            <div class="nav-item" data-section="saas"><i class="fas fa-cloud"></i> SaaS settings</div>
+            <div class="sidebar-footer">
+                <div class="nav-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
+            </div>
+        </div>
+
+        <!-- dynamic content panel -->
+        <div class="content-panel" id="contentPanel">
+            <!-- everything is filled by javascript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- STATE (simulated db) ----------
+        // default superadmin: demo/demo (password hashed concept)
+        let superadmin = {
+            username: 'demo',
+            // in real world would be bcrypt, for simulation we store plain (only for demo ui)
+            password: 'demo'
+        };
+
+        // is user logged in as superadmin? (null = not authenticated)
+        let currentSession = null; // { username: 'demo' } when logged in
+
+        // api keys storage
+        let apiKeys = [
+            { key: 'gdb_live_sk_9f8a7e6d5c', created: '2025-03-01', status: 'active' }
+        ];
+
+        // rtc mock stats
+        let rtcPeers = 7;
+
+        // SaaS settings
+        let saasPlan = 'enterprise';
+        let multitenant = true;
+
+        // helper to update all UI
+        function refreshUI() {
+            updateAuthBar();
+            renderCurrentSection();
+        }
+
+        // update top bar auth status
+        function updateAuthBar() {
+            const bar = document.getElementById('authStatusBar');
+            if (!bar) return;
+            if (currentSession) {
+                bar.innerHTML = `
+                    <div class="badge"><i class="fas fa-check-circle"></i> ${currentSession.username} (SuperAdmin)</div>
+                    <button class="btn-outline" id="settingsToggleBtn"><i class="fas fa-user-cog"></i> Profile</button>
+                `;
+                document.getElementById('settingsToggleBtn')?.addEventListener('click', (e) => {
+                    setActiveSection('superadmin');
+                });
+            } else {
+                bar.innerHTML = `
+                    <div class="badge"><i class="fas fa-shield-alt"></i> Not authenticated</div>
+                    <button class="btn-outline" id="showLoginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+                `;
+                document.getElementById('showLoginBtn')?.addEventListener('click', (e) => {
+                    setActiveSection('auth');
+                });
+            }
+        }
+
+        // simple router / active section
+        let activeSection = 'overview';
+        function setActiveSection(sectionId) {
+            activeSection = sectionId;
+            // update nav active class
+            document.querySelectorAll('.nav-item').forEach(el => {
+                const sec = el.dataset.section;
+                if (sec === sectionId) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+            renderCurrentSection();
+        }
+
+        // render content based on activeSection + auth
+        function renderCurrentSection() {
+            const panel = document.getElementById('contentPanel');
+            if (!panel) return;
+
+            // if not logged in, force AUTH section for everything except maybe overview (but we show warning)
+            if (!currentSession && activeSection !== 'auth' && activeSection !== 'overview') {
+                // but we redirect to auth with a message
+                activeSection = 'auth';
+                document.querySelectorAll('.nav-item').forEach(el => {
+                    el.classList.toggle('active', el.dataset.section === 'auth');
+                });
+            }
+
+            // render appropriate section
+            if (activeSection === 'overview') {
+                panel.innerHTML = renderOverview();
+                attachOverviewEvents();
+            } else if (activeSection === 'auth') {
+                panel.innerHTML = renderAuth();
+                attachAuthEvents();
+            } else if (activeSection === 'superadmin') {
+                panel.innerHTML = renderSuperadmin();
+                attachSuperadminEvents();
+            } else if (activeSection === 'apikeys') {
+                panel.innerHTML = renderApiKeys();
+                attachApiKeysEvents();
+            } else if (activeSection === 'rtc') {
+                panel.innerHTML = renderRTC();
+                attachRTCEvents();
+            } else if (activeSection === 'saas') {
+                panel.innerHTML = renderSaaS();
+                attachSaaSEvents();
+            } else {
+                panel.innerHTML = '<div>Select a section</div>';
+            }
+        }
+
+        // ---------- RENDERERS ----------
+        function renderOverview() {
+            const loggedIn = !!currentSession;
+            return `
+                <div class="section-title">P2P Database Overview</div>
+                <div class="section-desc">
+                    <i class="fas fa-database" style="margin-right: 8px;"></i>
+                    Real-time mesh: genusRTC active · ${loggedIn ? 'Authenticated' : 'Read-only (login for full control)'}
+                </div>
+                <div class="card-grid">
+                    <div class="stat-card"><div class="stat-title">PEER NODES</div><div class="stat-number">${rtcPeers}</div><div class="stat-footer">+2 from last week</div></div>
+                    <div class="stat-card"><div class="stat-title">ACTIVE KEYS</div><div class="stat-number">${apiKeys.length}</div><div class="stat-footer">${apiKeys.filter(k=>k.status==='active').length} active</div></div>
+                    <div class="stat-card"><div class="stat-title">SAAS TENANTS</div><div class="stat-number">${multitenant ? '3' : '1'}</div><div class="stat-footer">plan: ${saasPlan}</div></div>
+                    <div class="stat-card"><div class="stat-title">RTC PEERS</div><div class="stat-number">${rtcPeers}</div><div class="stat-footer">genusRTC mesh</div></div>
+                </div>
+                <div style="background:#f4f9fe; border-radius:24px; padding:22px; margin-top:18px;">
+                    <h3 style="margin-bottom:15px; font-weight:600;"> <i class="fas fa-cube" style="margin-right:10px;"></i> genusRTC live status</h3>
+                    <canvas id="rtcChart" style="height:180px; width:100%;"></canvas>
+                    <p style="margin-top:20px;">P2P sync: operational · latency 32ms</p>
+                </div>
+            `;
+        }
+
+        function renderAuth() {
+            return `
+                <div class="section-title">Authentication</div>
+                <div class="section-desc">Sign in as SuperAdmin to manage database, keys, and RTC settings.</div>
+                <div class="setting-group">
+                    <h3><i class="fas fa-sign-in-alt" style="margin-right:10px;"></i> Login</h3>
+                    <div class="flex-row">
+                        <input type="text" id="loginUsername" class="input-field" placeholder="Username" value="demo">
+                        <input type="password" id="loginPassword" class="input-field" placeholder="Password" value="demo">
+                        <button class="btn-primary" id="loginBtn"><i class="fas fa-arrow-right"></i> Authenticate</button>
+                    </div>
+                    <p style="margin-top:18px; color:#4b5f7b;"><i class="fas fa-info-circle"></i> Default superadmin: demo / demo (change in Superadmin panel)</p>
+                </div>
+                ${currentSession ? `<div class="tag" style="display:inline-block;"><i class="fas fa-check"></i> Already logged in as ${currentSession.username}</div>` : ''}
+            `;
+        }
+
+        function renderSuperadmin() {
+            if (!currentSession) return '<div class="section-title">Access denied</div><p>You must be logged in.</p>';
+            return `
+                <div class="section-title">Superadmin Control</div>
+                <div class="section-desc">Update credentials, system-wide settings.</div>
+                <div class="setting-group">
+                    <h3>Change Superadmin Password</h3>
+                    <div class="flex-row">
+                        <input type="text" id="newUsername" class="input-field" placeholder="New username" value="${superadmin.username}">
+                        <input type="password" id="newPassword" class="input-field" placeholder="New password">
+                        <button class="btn-primary" id="updateAdminBtn">Update</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h3>System Flags</h3>
+                    <label style="display:flex; align-items:center; gap:12px; margin:12px 0;"><input type="checkbox" id="maintenanceMode" ${false ? 'checked' : ''}> Maintenance mode (simulated)</label>
+                    <label style="display:flex; align-items:center; gap:12px;"><input type="checkbox" id="rtcEnable" checked> genusRTC enabled</label>
+                </div>
+                <hr>
+                <p><i class="fas fa-shield-alt"></i> Superadmin audit: last login from 192.168.1.1 (demo)</p>
+            `;
+        }
+
+        function renderApiKeys() {
+            if (!currentSession) return '<div class="section-title">Restricted</div><p>Login required to manage API keys.</p>';
+            return `
+                <div class="section-title">API Access & Keys</div>
+                <div class="section-desc">Generate and revoke access keys for API usage.</div>
+                <div class="setting-group">
+                    <h3>Generate new API key</h3>
+                    <div class="flex-row">
+                        <input type="text" id="keyDescription" class="input-field" placeholder="description (e.g. prod server)" value="default-key">
+                        <button class="btn-primary" id="generateKeyBtn"><i class="fas fa-plus"></i> Generate</button>
+                    </div>
+                    <div class="api-key-box" id="latestKeyPlaceholder" style="justify-content: center; opacity:0.7;">click generate to create</div>
+                </div>
+                <h3>Active Keys</h3>
+                <table class="api-table">
+                    <thead><tr><th>Key</th><th>Created</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody id="apiKeysTableBody">
+                        ${apiKeys.map(k => `<tr><td><code>${k.key}</code></td><td>${k.created}</td><td><span class="tag">${k.status}</span></td><td><button class="btn-secondary" data-key="${k.key}">Revoke</button></td></tr>`).join('')}
+                    </tbody>
+                </table>
+                <p style="margin-top:12px;">API base: <code>https://api.genosdb.com/v1</code> (example)</p>
+            `;
+        }
+
+        function renderRTC() {
+            return `
+                <div class="section-title">genusRTC Mesh</div>
+                <div class="section-desc">Real-time communication layer for P2P database.</div>
+                <div class="card-grid">
+                    <div class="stat-card"><div class="stat-title">PEERS</div><div class="stat-number">${rtcPeers}</div><button class="btn-secondary" id="simulatePeerJoin">+ join</button></div>
+                    <div class="stat-card"><div class="stat-title">CHANNELS</div><div class="stat-number">12</div></div>
+                </div>
+                <div class="setting-group">
+                    <h3>RTC configuration (simulated)</h3>
+                    <p>ICE servers: stun:stun.genosdb.com:3478</p>
+                    <p>Data channel: reliable (genusRTC v0.9)</p>
+                    <button class="btn-outline" id"resetRTC">reset signaling</button>
+                </div>
+            `;
+        }
+
+        function renderSaaS() {
+            return `
+                <div class="section-title">SaaS Ready</div>
+                <div class="section-desc">Multi-tenant settings & plan management.</div>
+                <div class="setting-group">
+                    <h3>Tenant plan</h3>
+                    <select id="saasPlanSelect" class="input-field" style="width:200px;">
+                        <option value="starter" ${saasPlan==='starter'?'selected':''}>Starter</option>
+                        <option value="business" ${saasPlan==='business'?'selected':''}>Business</option>
+                        <option value="enterprise" ${saasPlan==='enterprise'?'selected':''}>Enterprise</option>
+                    </select>
+                    <button class="btn-primary" id="updatePlanBtn">Update plan</button>
+                </div>
+                <div class="setting-group">
+                    <h3>Multi-tenant toggle</h3>
+                    <label><input type="checkbox" id="multitenantToggle" ${multitenant?'checked':''}> Enable isolation</label>
+                </div>
+            `;
+        }
+
+        // ---------- EVENT ATTACHMENTS ----------
+        function attachOverviewEvents() {
+            setTimeout(() => {
+                const canvas = document.getElementById('rtcChart');
+                if (canvas) {
+                    new Chart(canvas, {
+                        type: 'line',
+                        data: { labels: ['12:00','12:05','12:10','12:15','12:20'], datasets: [{ label: 'Peers', data: [5,7,8,7,9], borderColor: '#1e3f76' }] },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+            }, 50);
+        }
+
+        function attachAuthEvents() {
+            document.getElementById('loginBtn')?.addEventListener('click', () => {
+                const user = document.getElementById('loginUsername')?.value.trim() || '';
+                const pass = document.getElementById('loginPassword')?.value || '';
+                if (user === superadmin.username && pass === superadmin.password) {
+                    currentSession = { username: user };
+                    refreshUI();
+                    setActiveSection('overview');
+                } else {
+                    alert('Invalid credentials (default: demo/demo)');
+                }
+            });
+        }
+
+        function attachSuperadminEvents() {
+            if (!currentSession) return;
+            document.getElementById('updateAdminBtn')?.addEventListener('click', () => {
+                const newUser = document.getElementById('newUsername')?.value.trim();
+                const newPass = document.getElementById('newPassword')?.value;
+                if (newUser) superadmin.username = newUser;
+                if (newPass) superadmin.password = newPass;
+                currentSession.username = newUser; // update session
+                alert('Superadmin updated (simulated)');
+                refreshUI();
+            });
+        }
+
+        function attachApiKeysEvents() {
+            if (!currentSession) return;
+            document.getElementById('generateKeyBtn')?.addEventListener('click', () => {
+                const desc = document.getElementById('keyDescription')?.value || 'key';
+                const newKey = 'gdb_' + Math.random().toString(36).substring(2, 12) + '_' + Date.now().toString(36);
+                apiKeys.push({ key: newKey, created: new Date().toISOString().split('T')[0], status: 'active' });
+                document.getElementById('latestKeyPlaceholder').innerHTML = `<span>${newKey}</span> <button class="copy-btn" id="copyLatestKey">copy</button>`;
+                refreshUI(); // re-render table
+            });
+
+            // revoke buttons (delegation via manual after render)
+            document.querySelectorAll('#apiKeysTableBody button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const keyVal = e.target.dataset.key;
+                    apiKeys = apiKeys.filter(k => k.key !== keyVal);
+                    refreshUI();
+                });
+            });
+            const copyBtn = document.getElementById('copyLatestKey');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => navigator.clipboard?.writeText(copyBtn.previousElementSibling?.innerText || ''));
+            }
+        }
+
+        function attachRTCEvents() {
+            document.getElementById('simulatePeerJoin')?.addEventListener('click', ()=>{
+                rtcPeers++;
+                refreshUI();
+            });
+        }
+
+        function attachSaaSEvents() {
+            document.getElementById('updatePlanBtn')?.addEventListener('click', ()=>{
+                const select = document.getElementById('saasPlanSelect');
+                saasPlan = select.value;
+                refreshUI();
+            });
+            document.getElementById('multitenantToggle')?.addEventListener('click', (e)=>{
+                multitenant = e.target.checked;
+            });
+        }
+
+        // navigation listeners
+        document.querySelectorAll('.nav-item[data-section]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const section = e.currentTarget.dataset.section;
+                if (section) setActiveSection(section);
+            });
+        });
+
+        // logout
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            currentSession = null;
+            setActiveSection('overview');
+            refreshUI();
+        });
+
+        // initialize
+        refreshUI();
+        setActiveSection('overview');
+    })();
+</script>
+</body>
+</html>
