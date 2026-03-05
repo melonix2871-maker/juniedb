@@ -146,7 +146,7 @@
             display: none;
         }
 
-        /* Dashboard (hidden initially) */
+        /* Dashboard */
         .dashboard-container {
             display: none;
             width: 100%;
@@ -263,11 +263,16 @@
             flex-wrap: wrap;
         }
 
-        .filter-group select {
+        .filter-group select,
+        .filter-group input {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
+        }
+
+        .collection-filter-input {
+            min-width: 150px;
         }
 
         .btn-primary.small {
@@ -317,6 +322,15 @@
             padding: 12px;
             border-bottom: 1px solid #dee2e6;
             font-size: 14px;
+        }
+
+        .collection-badge {
+            background: #e8f0fe;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #1a73e8;
+            display: inline-block;
         }
 
         .actions {
@@ -441,6 +455,45 @@
             margin-right: 5px;
         }
 
+        /* Collection suggestions */
+        .suggestions-container {
+            position: relative;
+        }
+
+        .suggestions-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .suggestions-list.show {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .suggestion-item:hover {
+            background: #f8f9fa;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
         /* Loading Spinner */
         .spinner {
             display: inline-block;
@@ -521,7 +574,7 @@
                     </button>
                 </form>
 
-                <!-- Demo credentials hint (remove in production) -->
+                <!-- Demo credentials hint -->
                 <div class="demo-hint">
                     <strong>Demo Credentials:</strong><br>
                     Email: admin@example.com<br>
@@ -568,13 +621,9 @@
                     <input type="text" id="searchInput" placeholder="Search by meta key or value...">
                 </div>
                 <div class="filter-group">
-                    <select id="collectionFilter">
-                        <option value="">All Collections</option>
-                        <option value="user">Users</option>
-                        <option value="post">Posts</option>
-                        <option value="page">Pages</option>
-                        <option value="setting">Settings</option>
-                    </select>
+                    <input type="text" id="collectionFilter" class="collection-filter-input" 
+                           placeholder="Filter by collection..." list="collectionSuggestions">
+                    <datalist id="collectionSuggestions"></datalist>
                     <select id="repeaterFilter">
                         <option value="">All (Any)</option>
                         <option value="true">Repeater Only</option>
@@ -633,13 +682,10 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Collection</label>
-                        <select id="collection">
-                            <option value="user">User</option>
-                            <option value="post">Post</option>
-                            <option value="page">Page</option>
-                            <option value="setting">Setting</option>
-                        </select>
+                        <label>Collection <span style="color:#666; font-weight:normal;">(e.g., user, post, product, category)</span></label>
+                        <input type="text" id="collection" placeholder="Enter collection name" list="collectionModalSuggestions" autocomplete="off">
+                        <datalist id="collectionModalSuggestions"></datalist>
+                        <div id="collectionError" class="error-message"></div>
                     </div>
                     
                     <div class="form-group">
@@ -679,7 +725,6 @@
                 this.csrfToken = this.generateCSRFToken();
                 this.session = null;
                 this.db = null;
-                // In production, this would be your actual Ethereum address
                 this.SUPER_ADMIN_ADDRESS = '0xAdminAddressHere';
             }
 
@@ -732,7 +777,7 @@
         }
 
         // =============================================
-        // 2. AUTH MANAGER (Login Only)
+        // 2. AUTH MANAGER
         // =============================================
 
         class AuthManager {
@@ -743,8 +788,6 @@
 
             async login(email, password) {
                 try {
-                    // In a real app, you'd verify against stored credentials
-                    // For demo, we'll use hardcoded superadmin
                     if (email === 'admin@example.com' && password === 'Admin123!') {
                         this.currentUser = {
                             id: 1,
@@ -753,7 +796,6 @@
                             isSuperAdmin: true
                         };
                         
-                        // Create session record
                         await this.security.db.put({
                             id: Date.now(),
                             relid: 1,
@@ -776,7 +818,6 @@
 
             async logout() {
                 if (this.currentUser) {
-                    // Invalidate current session
                     await this.security.db.map({ 
                         query: { 
                             collection: 'user', 
@@ -832,8 +873,32 @@
                     }
                 });
                 
+                this.updateCollectionSuggestions();
                 this.renderTable();
                 this.updateStats();
+            }
+
+            updateCollectionSuggestions() {
+                const collections = new Set();
+                Array.from(this.data.values()).forEach(record => {
+                    if (record.collection) {
+                        collections.add(record.collection);
+                    }
+                });
+                
+                // Update filter datalist
+                const filterDatalist = document.getElementById('collectionSuggestions');
+                filterDatalist.innerHTML = Array.from(collections)
+                    .sort()
+                    .map(c => `<option value="${c}">`)
+                    .join('');
+                
+                // Update modal datalist
+                const modalDatalist = document.getElementById('collectionModalSuggestions');
+                modalDatalist.innerHTML = Array.from(collections)
+                    .sort()
+                    .map(c => `<option value="${c}">`)
+                    .join('');
             }
 
             async createRecord(data) {
@@ -841,12 +906,17 @@
                     throw new Error('Not authenticated');
                 }
 
+                // Validate collection name
+                if (!data.collection || data.collection.trim() === '') {
+                    throw new Error('Collection name is required');
+                }
+
                 const id = this.nextId++;
                 const record = {
                     id,
                     relid: parseInt(data.relid) || 0,
                     repeater: data.repeater || false,
-                    collection: data.collection || 'user',
+                    collection: this.security.sanitizeInput(data.collection.trim().toLowerCase()),
                     metaKey: this.security.sanitizeInput(data.metaKey || ''),
                     metaValue: this.security.sanitizeInput(data.metaValue || ''),
                     dateCreated: data.dateCreated || new Date().toISOString()
@@ -870,7 +940,7 @@
 
                 const sanitizedUpdates = {};
                 for (let [key, value] of Object.entries(updates)) {
-                    if (key === 'metaKey' || key === 'metaValue') {
+                    if (key === 'collection' || key === 'metaKey' || key === 'metaValue') {
                         sanitizedUpdates[key] = this.security.sanitizeInput(value);
                     } else {
                         sanitizedUpdates[key] = value;
@@ -921,6 +991,33 @@
                 return results[0].metaValue;
             }
 
+            async getCollection(collection, filters = {}) {
+                const results = [];
+                const query = { collection, ...filters };
+                
+                await this.security.db.map({ query }, (id, value) => {
+                    results.push(value);
+                });
+                
+                const latestMap = new Map();
+                results.forEach(record => {
+                    const key = `${record.relid}:${record.metaKey}`;
+                    if (record.repeater) {
+                        if (!latestMap.has(key)) {
+                            latestMap.set(key, []);
+                        }
+                        latestMap.get(key).push(record);
+                    } else {
+                        const existing = latestMap.get(key);
+                        if (!existing || record.id > existing.id) {
+                            latestMap.set(key, record);
+                        }
+                    }
+                });
+                
+                return Array.from(latestMap.values());
+            }
+
             // UI Methods
             renderTable() {
                 const tbody = document.getElementById('tableBody');
@@ -938,7 +1035,9 @@
                 }
                 
                 if (this.filters.collection) {
-                    records = records.filter(r => r.collection === this.filters.collection);
+                    records = records.filter(r => 
+                        r.collection?.toLowerCase().includes(this.filters.collection.toLowerCase())
+                    );
                 }
                 
                 if (this.filters.repeater) {
@@ -972,7 +1071,7 @@
                         <td><strong>${record.id}</strong></td>
                         <td>${record.relid || 0}</td>
                         <td>${record.repeater ? '🔄 Yes' : '❌ No'}</td>
-                        <td><span style="background:#e8f0fe;padding:2px 8px;border-radius:12px;">${record.collection}</span></td>
+                        <td><span class="collection-badge">${record.collection}</span></td>
                         <td><strong>${record.metaKey}</strong></td>
                         <td>${record.metaValue}</td>
                         <td>${new Date(record.dateCreated).toLocaleString()}</td>
@@ -1001,10 +1100,10 @@
 
             updateStats() {
                 const records = Array.from(this.data.values());
+                const collections = new Set(records.map(r => r.collection));
                 
                 document.getElementById('totalRecords').textContent = records.length;
-                document.getElementById('totalCollections').textContent = 
-                    new Set(records.map(r => r.collection)).size;
+                document.getElementById('totalCollections').textContent = collections.size;
                 document.getElementById('totalUsers').textContent = 
                     records.filter(r => r.collection === 'user').length;
                 document.getElementById('totalPosts').textContent = 
@@ -1129,7 +1228,7 @@
             
             if (records.length > 0) return;
             
-            // Add sample records
+            // Add sample records with various collections
             const sampleData = [
                 { relid: 1, collection: 'user', metaKey: 'firstname', metaValue: 'John' },
                 { relid: 1, collection: 'user', metaKey: 'lastname', metaValue: 'Doe' },
@@ -1138,8 +1237,14 @@
                 { relid: 2, collection: 'user', metaKey: 'lastname', metaValue: 'Smith' },
                 { relid: 1, collection: 'post', metaKey: 'title', metaValue: 'Hello World', repeater: true },
                 { relid: 1, collection: 'post', metaKey: 'content', metaValue: 'This is my first post', repeater: true },
+                { relid: 1, collection: 'product', metaKey: 'name', metaValue: 'Laptop' },
+                { relid: 1, collection: 'product', metaKey: 'price', metaValue: '999.99' },
+                { relid: 2, collection: 'product', metaKey: 'name', metaValue: 'Mouse' },
+                { relid: 2, collection: 'product', metaKey: 'price', metaValue: '29.99' },
                 { relid: 0, collection: 'setting', metaKey: 'site_name', metaValue: 'GenosDB Admin' },
-                { relid: 0, collection: 'setting', metaKey: 'version', metaValue: '1.0.0' }
+                { relid: 0, collection: 'setting', metaKey: 'version', metaValue: '1.0.0' },
+                { relid: 1, collection: 'category', metaKey: 'name', metaValue: 'Electronics' },
+                { relid: 2, collection: 'category', metaKey: 'name', metaValue: 'Accessories' }
             ];
             
             let id = 1;
@@ -1272,12 +1377,15 @@
             document.getElementById('recordId').value = '';
             document.getElementById('relid').value = '0';
             document.getElementById('repeater').checked = false;
-            document.getElementById('collection').value = 'user';
+            document.getElementById('collection').value = '';
             document.getElementById('metaKey').value = '';
             document.getElementById('metaValue').value = '';
             document.getElementById('dateCreated').value = new Date().toISOString().slice(0, 16);
             document.getElementById('modalTitle').textContent = 'Create New Record';
             document.getElementById('modal').classList.add('active');
+            
+            // Update suggestions
+            dbManager.updateCollectionSuggestions();
         };
         
         window.saveRecord = async (event) => {
@@ -1290,10 +1398,20 @@
             }
             
             const id = document.getElementById('recordId').value;
+            const collection = document.getElementById('collection').value.trim();
+            
+            // Validate collection
+            if (!collection) {
+                document.getElementById('collectionError').textContent = 'Collection name is required';
+                return;
+            } else {
+                document.getElementById('collectionError').textContent = '';
+            }
+            
             const data = {
                 relid: parseInt(document.getElementById('relid').value) || 0,
                 repeater: document.getElementById('repeater').checked,
-                collection: document.getElementById('collection').value,
+                collection: collection,
                 metaKey: document.getElementById('metaKey').value,
                 metaValue: document.getElementById('metaValue').value,
                 dateCreated: document.getElementById('dateCreated').value || new Date().toISOString()
@@ -1317,11 +1435,12 @@
         
         window.closeModal = () => {
             document.getElementById('modal').classList.remove('active');
+            document.getElementById('collectionError').textContent = '';
         };
 
         // Event listeners for filters
         document.getElementById('searchInput')?.addEventListener('input', () => dbManager?.applyFilters());
-        document.getElementById('collectionFilter')?.addEventListener('change', () => dbManager?.applyFilters());
+        document.getElementById('collectionFilter')?.addEventListener('input', () => dbManager?.applyFilters());
         document.getElementById('repeaterFilter')?.addEventListener('change', () => dbManager?.applyFilters());
 
         // Initial validation
