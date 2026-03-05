@@ -211,11 +211,11 @@
   </div>
 </div>
 
-<!-- Create Record Modal -->
-<div id="createModal" class="modal">
+<!-- Create/Edit Record Modal -->
+<div id="recordModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">×</span>
-    <h2>Create Record</h2>
+    <h2 id="modalTitle">Create Record</h2>
     
     <div class="form-group">
       <label>Relational ID (optional)</label>
@@ -245,6 +245,8 @@
       <textarea id="metaValue" rows="3" placeholder="value or JSON..."></textarea>
     </div>
     
+    <input type="hidden" id="editId" />
+    
     <button class="btn-primary" style="width:100%;" onclick="saveRecord()">Save Record</button>
     <button class="btn-outline" style="width:100%; margin-top:0.8rem;" onclick="closeModal()">Cancel</button>
   </div>
@@ -267,6 +269,9 @@ const adminEmailField = document.getElementById("adminEmail");
 const newMnemonicInput = document.getElementById("newMnemonic");
 const peerCountEl = document.getElementById("peerCount");
 const filterSelect = document.getElementById("filterSelect");
+const modal = document.getElementById("recordModal");
+const modalTitle = document.getElementById("modalTitle");
+const editIdInput = document.getElementById("editId");
 
 // Helper: show/hide main UI
 function setLoggedIn(state) {
@@ -280,14 +285,11 @@ async function tryAutoLoginWithWebAuthn() {
     db = await gdb("genosdb-admin", { 
       rtc: true,
       cells: true,  // Enable cellular mesh for scalability
-      sm: true      // Enable security manager
+      sm: { superAdmins: [] }  // Dynamic superadmin assignment
     });
-    // Assuming sm.hasExistingWebAuthnRegistration and sm.loginCurrentUserWithWebAuthn exist based on trust model
-    if (db.sm && await db.sm.hasExistingWebAuthnRegistration()) {
-      await db.sm.loginCurrentUserWithWebAuthn();
-      currentUserAddress = db.sm.getCurrentUserAddress();
-      return true;
-    }
+    await db.sm.loginCurrentUserWithWebAuthn();
+    currentUserAddress = db.sm.getCurrentUserAddress();
+    return true;
   } catch (err) {
     console.warn("Auto-login failed:", err);
   }
@@ -298,13 +300,14 @@ async function tryAutoLoginWithWebAuthn() {
 async function registerNew() {
   try {
     if (!db) {
-      db = await gdb("genosdb-admin", { rtc: true, cells: true, sm: true });
+      db = await gdb("genosdb-admin", { rtc: true, cells: true, sm: { superAdmins: [] } });
     }
-    // Start registration, get mnemonic
-    const { mnemonic, address } = await db.sm.startNewUserRegistration();  // Assumes this API
+    const { mnemonic, address } = await db.sm.startNewUserRegistration();
     currentUserAddress = address;
+    db.sm.superAdmins.push(address);  // Add as superadmin
+    await db.sm.assignRole(address, 'superadmin');
+    await db.sm.protectCurrentIdentityWithWebAuthn();  // Set up WebAuthn
     alert(`New superadmin registered!\nAddress: ${address}\nMnemonic (backup this!): ${mnemonic}`);
-    await db.sm.registerWebAuthn();  // Optional passkey setup
     setLoggedIn(true);
     adminEmailField.value = currentUserAddress;
     setupPeers();
@@ -329,13 +332,12 @@ async function login() {
       db = await gdb("genosdb-admin", { 
         rtc: true,
         cells: true,
-        sm: { superAdmins: [] }  // Will validate via signed ops
+        sm: { superAdmins: [] }
       });
     }
-    await db.sm.loginOrRecoverUserWithMnemonic(mnemonic);  // Recover keypair/address
+    await db.sm.loginOrRecoverUserWithMnemonic(mnemonic);
     currentUserAddress = db.sm.getCurrentUserAddress();
-    // Update superAdmins if needed (for this session)
-    db.sm.superAdmins = [currentUserAddress];  // Assume mutable
+    // Check if superadmin; assume for admin dashboard
     adminEmailField.value = identifier || currentUserAddress;
     setLoggedIn(true);
     setupPeers();
@@ -345,7 +347,7 @@ async function login() {
   }
 }
 
-// Update credentials (simplified, re-register with new mnemonic)
+// Update credentials (recover with new mnemonic)
 async function updateCredentials() {
   const newMnemonic = newMnemonicInput.value.trim();
   if (!newMnemonic) return;
@@ -353,6 +355,7 @@ async function updateCredentials() {
   try {
     await db.sm.loginOrRecoverUserWithMnemonic(newMnemonic);
     currentUserAddress = db.sm.getCurrentUserAddress();
+    await db.sm.protectCurrentIdentityWithWebAuthn();
     adminEmailField.value = currentUserAddress;
     alert("Credentials updated");
     newMnemonicInput.value = "";
@@ -365,7 +368,7 @@ async function updateCredentials() {
 async function logout() {
   if (!confirm("Logout?")) return;
   if (unsubscribe) unsubscribe();
-  if (db && db.sm) await db.sm.logout();
+  if (db && db.sm) await db.sm.clearSecurity();
   db = null;
   currentUserAddress = null;
   records = [];
@@ -385,20 +388,40 @@ function setupPeers() {
     peers.delete(peerId);
     peerCountEl.textContent = peers.size;
   });
-  // Initial count (if any)
+  // Initial count
   peerCountEl.textContent = peers.size;
 }
 
-// Open/close modal
+// Open/close modal for create/edit
 function openCreateModal() {
-  document.getElementById("createModal").style.display = "flex";
-}
-function closeModal() {
-  document.getElementById("createModal").style.display = "none";
+  modalTitle.textContent = "Create Record";
+  editIdInput.value = "";
+  document.getElementById("relId").value = "";
+  document.getElementById("isRepeater").value = "false";
+  document.getElementById("collection").value = "";
+  document.getElementById("metaKey").value = "";
+  document.getElementById("metaValue").value = "";
+  modal.style.display = "flex";
 }
 
-// Save new record (CREATE)
+function openEditModal(record) {
+  modalTitle.textContent = "Edit Record";
+  editIdInput.value = record.id;
+  document.getElementById("relId").value = record.relId || "";
+  document.getElementById("isRepeater").value = record.repeater ? "true" : "false";
+  document.getElementById("collection").value = record.type || "";
+  document.getElementById("metaKey").value = record.metaKey || "";
+  document.getElementById("metaValue").value = record.metaValue || "";
+  modal.style.display = "flex";
+}
+
+function closeModal() {
+  modal.style.display = "none";
+}
+
+// Save record (CREATE/UPDATE)
 async function saveRecord() {
+  const id = editIdInput.value;
   const relId = document.getElementById("relId").value.trim() || null;
   const isRepeater = document.getElementById("isRepeater").value === "true";
   const collection = document.getElementById("collection").value.trim();
@@ -412,19 +435,18 @@ async function saveRecord() {
 
   try {
     const value = {
-      type: collection,  // Use type for collection
+      type: collection,
       relId,
       repeater: isRepeater,
       metaKey,
       metaValue,
-      dateCreated: new Date().toISOString()
+      dateCreated: id ? records.find(r => r.id === id).dateCreated : new Date().toISOString()
     };
-    const id = await db.put(value);
+    const newId = await db.sm.put(id || value);  // Use sm.put for secured write
     closeModal();
-    // Real-time will update via subscription
-    alert("Record created: " + id);
+    alert(`${id ? "Updated" : "Created"} record: ${newId || id}`);
   } catch (err) {
-    alert("Create failed: " + err.message);
+    alert("Save failed: " + err.message);
   }
 }
 
@@ -432,8 +454,7 @@ async function saveRecord() {
 async function deleteRecord(id) {
   if (!confirm("Delete this record?")) return;
   try {
-    await db.remove(id);
-    // Real-time will update
+    await db.sm.remove(id);  // Secured delete
   } catch (err) {
     alert("Delete failed: " + err.message);
   }
@@ -444,20 +465,20 @@ async function refreshData() {
   const tbody = document.getElementById("recordsTable");
   tbody.innerHTML = "<tr><td colspan='8' style='text-align:center; color:var(--muted);'>Loading...</td></tr>";
 
-  if (unsubscribe) unsubscribe();  // Clean previous
+  if (unsubscribe) unsubscribe();
 
-  records = [];  // Reset cache
+  records = [];
 
   const filter = filterSelect.value;
 
-  const query = {};  // Query all; adjust for filters if needed
+  const query = {};  // All records
 
-  const { unsubscribe: unsub } = await db.map(
+  const { unsubscribe: unsub } = await db.sm.map(  // Use sm.map for secured read
     { query, realtime: true },
     ({ id, value, action }) => {
       if (action === "removed") {
         records = records.filter(r => r.id !== id);
-      } else if (action === "added" || action === "updated" || action === "initial") {
+      } else {
         const record = { id, ...value };
         const index = records.findIndex(r => r.id === id);
         if (index > -1) {
@@ -467,15 +488,10 @@ async function refreshData() {
         }
       }
 
-      // Apply UI filter
       let filtered = records;
-      if (filter === "repeater") {
-        filtered = records.filter(r => r.repeater);
-      } else if (filter === "single") {
-        filtered = records.filter(r => !r.repeater);
-      }
+      if (filter === "repeater") filtered = records.filter(r => r.repeater);
+      if (filter === "single") filtered = records.filter(r => !r.repeater);
 
-      // Render table
       tbody.innerHTML = "";
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--muted);">No records</td></tr>`;
@@ -490,13 +506,15 @@ async function refreshData() {
             <td>${r.metaKey}</td>
             <td>${(r.metaValue || "[empty]").substring(0,40)}${r.metaValue?.length > 40 ? "..." : ""}</td>
             <td>${r.dateCreated}</td>
-            <td><button class="btn-danger" style="font-size:0.8rem; padding:0.4rem 0.8rem;" onclick="deleteRecord('${r.id}')">Delete</button></td>
+            <td>
+              <button class="btn-outline" style="font-size:0.8rem; padding:0.4rem 0.8rem;" onclick='openEditModal(${JSON.stringify(r)})'>Edit</button>
+              <button class="btn-danger" style="font-size:0.8rem; padding:0.4rem 0.8rem;" onclick="deleteRecord('${r.id}')">Delete</button>
+            </td>
           `;
           tbody.appendChild(tr);
         });
       }
 
-      // Update counters
       document.getElementById("totalRecords").textContent = records.length;
       document.getElementById("collectionsCount").textContent = new Set(records.map(r => r.type)).size || 0;
       document.getElementById("usersCount").textContent = records.filter(r => r.type === "users").length || 0;
