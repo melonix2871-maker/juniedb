@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GenosDB Admin - Secure Authentication</title>
+    <title>GenosDB Admin - Secure Login</title>
     <style>
         * {
             margin: 0;
@@ -37,12 +37,12 @@
         .auth-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
         }
 
         .auth-header h1 {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 10px;
         }
 
@@ -51,36 +51,8 @@
             font-size: 14px;
         }
 
-        .auth-tabs {
-            display: flex;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .auth-tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            color: #666;
-            transition: all 0.3s;
-        }
-
-        .auth-tab.active {
-            color: #667eea;
-            border-bottom: 2px solid #667eea;
-        }
-
         .auth-form {
             padding: 30px;
-            display: none;
-        }
-
-        .auth-form.active {
-            display: block;
         }
 
         .form-group {
@@ -120,30 +92,6 @@
             min-height: 18px;
         }
 
-        .validation-hint {
-            color: #666;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .password-strength {
-            height: 4px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .password-strength-bar {
-            height: 100%;
-            width: 0;
-            transition: all 0.3s;
-        }
-
-        .strength-weak { background: #dc3545; width: 33.33%; }
-        .strength-medium { background: #ffc107; width: 66.66%; }
-        .strength-strong { background: #28a745; width: 100%; }
-
         .btn {
             width: 100%;
             padding: 14px;
@@ -160,7 +108,7 @@
             color: white;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
@@ -168,13 +116,12 @@
         .btn-primary:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
 
         .alert {
             padding: 12px;
             border-radius: 6px;
-            margin-bottom: 20px;
+            margin: 20px 30px 0 30px;
             font-size: 14px;
             display: none;
         }
@@ -195,12 +142,6 @@
             border: 1px solid #c3e6cb;
         }
 
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
         .csrf-token {
             display: none;
         }
@@ -217,7 +158,6 @@
             display: block;
         }
 
-        /* Header */
         .dashboard-header {
             background: white;
             padding: 20px;
@@ -247,11 +187,6 @@
             color: white;
         }
 
-        .badge.user {
-            background: #e8f0fe;
-            color: #1a73e8;
-        }
-
         .btn-logout {
             padding: 8px 16px;
             background: #dc3545;
@@ -259,6 +194,10 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
+        }
+
+        .btn-logout:hover {
+            background: #bb2d3b;
         }
 
         /* Stats Cards */
@@ -331,6 +270,24 @@
             font-size: 14px;
         }
 
+        .btn-primary.small {
+            padding: 10px 20px;
+            width: auto;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
         .table-container {
             padding: 20px;
             overflow-x: auto;
@@ -350,6 +307,10 @@
             font-size: 14px;
             border-bottom: 2px solid #dee2e6;
             cursor: pointer;
+        }
+
+        th:hover {
+            background: #e9ecef;
         }
 
         td {
@@ -376,14 +337,43 @@
             color: #1a73e8;
         }
 
+        .edit-btn:hover {
+            background: #d2e3fc;
+        }
+
         .delete-btn {
             background: #fee8e8;
             color: #dc3545;
         }
 
-        .action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .delete-btn:hover {
+            background: #fdd5d5;
+        }
+
+        .pagination {
+            padding: 20px;
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .page-btn:hover {
+            background: #e9ecef;
+        }
+
+        .page-btn.active {
+            background: #1a73e8;
+            color: white;
+            border-color: #1a73e8;
         }
 
         /* Modal */
@@ -421,6 +411,11 @@
             align-items: center;
         }
 
+        .modal-header h2 {
+            color: #333;
+            font-size: 20px;
+        }
+
         .modal-body {
             padding: 20px;
         }
@@ -433,6 +428,19 @@
             justify-content: flex-end;
         }
 
+        /* Checkbox style */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+
         /* Loading Spinner */
         .spinner {
             display: inline-block;
@@ -442,6 +450,7 @@
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
         }
 
         @keyframes spin {
@@ -457,10 +466,26 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
         }
+
+        /* Demo credentials hint */
+        .demo-hint {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+            border: 1px dashed #dee2e6;
+        }
+
+        .demo-hint strong {
+            color: #1a73e8;
+        }
     </style>
 </head>
 <body>
-    <!-- Authentication Container (shown first) -->
+    <!-- Login Container -->
     <div id="authContainer" class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -468,110 +493,56 @@
                 <p>Secure Peer-to-Peer Database Management</p>
             </div>
 
-            <!-- CSRF Token (generated per session) -->
+            <!-- CSRF Token -->
             <input type="hidden" id="csrfToken" value="">
 
-            <!-- Tabs -->
-            <div class="auth-tabs">
-                <button class="auth-tab active" onclick="switchTab('login')">Login</button>
-                <button class="auth-tab" onclick="switchTab('register')">Register</button>
-            </div>
-
-            <!-- Alert Messages -->
+            <!-- Alert Message -->
             <div id="authAlert" class="alert"></div>
 
             <!-- Login Form -->
-            <div id="loginForm" class="auth-form active">
+            <div class="auth-form">
                 <form onsubmit="handleLogin(event)">
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" id="loginEmail" placeholder="your@email.com" 
-                               oninput="validateLoginForm()">
+                        <input type="email" id="loginEmail" placeholder="admin@example.com" 
+                               value="admin@example.com" oninput="validateLoginForm()">
                         <div id="loginEmailError" class="error-message"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Password</label>
                         <input type="password" id="loginPassword" placeholder="••••••••" 
-                               oninput="validateLoginForm()">
+                               value="Admin123!" oninput="validateLoginForm()">
                         <div id="loginPasswordError" class="error-message"></div>
                     </div>
 
-                    <button type="submit" id="loginBtn" class="btn btn-primary" disabled>
-                        Login
+                    <button type="submit" id="loginBtn" class="btn btn-primary">
+                        Login to Dashboard
                     </button>
                 </form>
 
-                <div style="text-align: center; margin-top: 20px;">
-                    <a href="#" onclick="switchTab('register')" style="color: #667eea; text-decoration: none;">
-                        Don't have an account? Register
-                    </a>
-                </div>
-            </div>
-
-            <!-- Registration Form -->
-            <div id="registerForm" class="auth-form">
-                <form onsubmit="handleRegister(event)">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="regName" placeholder="John Doe" 
-                               oninput="validateRegisterForm()">
-                        <div id="regNameError" class="error-message"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" id="regEmail" placeholder="your@email.com" 
-                               oninput="validateRegisterForm()">
-                        <div id="regEmailError" class="error-message"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="regPassword" placeholder="••••••••" 
-                               oninput="validateRegisterForm(); checkPasswordStrength()">
-                        <div id="regPasswordError" class="error-message"></div>
-                        <div class="validation-hint">
-                            Minimum 8 characters, 1 uppercase, 1 number, 1 special character
-                        </div>
-                        <div class="password-strength">
-                            <div id="passwordStrengthBar" class="password-strength-bar"></div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Confirm Password</label>
-                        <input type="password" id="regConfirmPassword" placeholder="••••••••" 
-                               oninput="validateRegisterForm()">
-                        <div id="regConfirmError" class="error-message"></div>
-                    </div>
-
-                    <button type="submit" id="registerBtn" class="btn btn-primary" disabled>
-                        Create Account
-                    </button>
-                </form>
-
-                <div style="text-align: center; margin-top: 20px;">
-                    <a href="#" onclick="switchTab('login')" style="color: #667eea; text-decoration: none;">
-                        Already have an account? Login
-                    </a>
+                <!-- Demo credentials hint (remove in production) -->
+                <div class="demo-hint">
+                    <strong>Demo Credentials:</strong><br>
+                    Email: admin@example.com<br>
+                    Password: Admin123!
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Dashboard Container (hidden until login) -->
+    <!-- Dashboard Container -->
     <div id="dashboardContainer" class="dashboard-container">
         <div class="dashboard-header">
-            <h1>📊 Dashboard</h1>
+            <h1>📊 Database Dashboard</h1>
             <div class="user-info">
-                <span id="userDisplayName" class="user-badge"></span>
+                <span id="userDisplayName" class="user-badge badge superadmin">👑 SuperAdmin</span>
                 <button onclick="handleLogout()" class="btn-logout">Logout</button>
             </div>
         </div>
 
         <!-- Stats Cards -->
-        <div class="stats-grid" id="statsGrid">
+        <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Records</h3>
                 <div class="number" id="totalRecords">0</div>
@@ -605,14 +576,12 @@
                         <option value="setting">Settings</option>
                     </select>
                     <select id="repeaterFilter">
-                        <option value="">All</option>
+                        <option value="">All (Any)</option>
                         <option value="true">Repeater Only</option>
                         <option value="false">Single Only</option>
                     </select>
-                    <button id="createBtn" class="btn-primary" style="padding: 10px 20px;" 
-                            onclick="openCreateModal()">➕ Create</button>
-                    <button id="refreshBtn" class="btn-secondary" style="padding: 10px 20px;" 
-                            onclick="loadData()">🔄 Refresh</button>
+                    <button onclick="openCreateModal()" class="btn-primary small">➕ Create New</button>
+                    <button onclick="loadData()" class="btn-secondary">🔄 Refresh</button>
                 </div>
             </div>
 
@@ -620,7 +589,7 @@
                 <table id="dataTable">
                     <thead>
                         <tr>
-                            <th onclick="sortBy('id')">ID</th>
+                            <th onclick="sortBy('id')">ID ⬇️</th>
                             <th onclick="sortBy('relid')">Relational ID</th>
                             <th onclick="sortBy('repeater')">Repeater</th>
                             <th onclick="sortBy('collection')">Collection</th>
@@ -654,13 +623,13 @@
                     
                     <div class="form-group">
                         <label>Relational ID</label>
-                        <input type="number" id="relid">
+                        <input type="number" id="relid" value="0">
                         <div id="relidError" class="error-message"></div>
                     </div>
                     
-                    <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <div class="checkbox-group">
                         <input type="checkbox" id="repeater">
-                        <label>Repeater (Allow multiple values)</label>
+                        <label for="repeater">Repeater (Allow multiple values)</label>
                     </div>
                     
                     <div class="form-group">
@@ -693,7 +662,7 @@
             </div>
             <div class="modal-footer">
                 <button onclick="closeModal()" class="btn-secondary">Cancel</button>
-                <button onclick="saveRecord(event)" class="btn-primary">Save</button>
+                <button onclick="saveRecord(event)" class="btn-primary">Save Record</button>
             </div>
         </div>
     </div>
@@ -702,7 +671,7 @@
         import { gdb } from "https://cdn.jsdelivr.net/npm/genosdb@latest/dist/index.min.js";
 
         // =============================================
-        // 1. SECURITY & VALIDATION
+        // 1. SECURITY MANAGER
         // =============================================
 
         class SecurityManager {
@@ -710,48 +679,25 @@
                 this.csrfToken = this.generateCSRFToken();
                 this.session = null;
                 this.db = null;
-                this.SUPER_ADMIN_ADDRESS = '0xYourEthereumAddressHere'; // Replace with your address
+                // In production, this would be your actual Ethereum address
+                this.SUPER_ADMIN_ADDRESS = '0xAdminAddressHere';
             }
 
-            // Generate cryptographically strong CSRF token
             generateCSRFToken() {
                 const array = new Uint8Array(32);
                 crypto.getRandomValues(array);
                 return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
             }
 
-            // Validate CSRF token
             validateCSRFToken(token) {
                 return token === this.csrfToken;
             }
 
-            // Password strength checker
-            checkPasswordStrength(password) {
-                let score = 0;
-                const checks = {
-                    length: password.length >= 8,
-                    uppercase: /[A-Z]/.test(password),
-                    lowercase: /[a-z]/.test(password),
-                    number: /[0-9]/.test(password),
-                    special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-                };
-
-                score = Object.values(checks).filter(Boolean).length;
-
-                return {
-                    score,
-                    checks,
-                    strength: score <= 2 ? 'weak' : score <= 4 ? 'medium' : 'strong'
-                };
-            }
-
-            // Validate email format
             validateEmail(email) {
                 const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return re.test(email);
             }
 
-            // Sanitize input (prevent XSS)
             sanitizeInput(input) {
                 if (typeof input !== 'string') return input;
                 return input.replace(/[&<>"']/g, function(m) {
@@ -764,7 +710,6 @@
                 });
             }
 
-            // Hash password (simulated - in production, use proper bcrypt)
             async hashPassword(password) {
                 const encoder = new TextEncoder();
                 const data = encoder.encode(password + this.csrfToken);
@@ -774,7 +719,6 @@
                     .join('');
             }
 
-            // Initialize database with security
             async initDB(room = 'genosdb-secure') {
                 this.db = await gdb(room, {
                     rtc: true,
@@ -788,176 +732,54 @@
         }
 
         // =============================================
-        // 2. AUTHENTICATION MANAGER
+        // 2. AUTH MANAGER (Login Only)
         // =============================================
 
         class AuthManager {
             constructor(security) {
                 this.security = security;
                 this.currentUser = null;
-                this.isSuperAdmin = false;
             }
 
-            // Register new user
-            async register(userData) {
-                try {
-                    // Check if email already exists
-                    const existing = await this.security.db.map({
-                        query: { 
-                            collection: 'user', 
-                            metaKey: 'email',
-                            metaValue: userData.email 
-                        }
-                    });
-
-                    if (existing.size > 0) {
-                        throw new Error('Email already registered');
-                    }
-
-                    // Hash password
-                    const hashedPassword = await this.security.hashPassword(userData.password);
-
-                    // Create user records
-                    const timestamp = new Date().toISOString();
-                    
-                    // Get next ID (simplified - in production, use atomic counter)
-                    const users = await this.security.db.map({ query: { collection: 'user' } });
-                    const nextId = users.size + 1;
-
-                    // Store user data (repeater=true for multiple sessions/emails if needed)
-                    await this.security.db.put({
-                        id: nextId,
-                        relid: nextId,
-                        repeater: false,
-                        collection: 'user',
-                        metaKey: 'name',
-                        metaValue: this.security.sanitizeInput(userData.name),
-                        dateCreated: timestamp
-                    }, `user:${nextId}:name`);
-
-                    await this.security.db.put({
-                        id: nextId + 1000, // Offset for email records
-                        relid: nextId,
-                        repeater: true, // Allow multiple emails per user
-                        collection: 'user',
-                        metaKey: 'email',
-                        metaValue: this.security.sanitizeInput(userData.email),
-                        dateCreated: timestamp
-                    }, `user:${nextId}:email:1`);
-
-                    await this.security.db.put({
-                        id: nextId + 2000,
-                        relid: nextId,
-                        repeater: false,
-                        collection: 'user',
-                        metaKey: 'password',
-                        metaValue: hashedPassword,
-                        dateCreated: timestamp
-                    }, `user:${nextId}:password`);
-
-                    await this.security.db.put({
-                        id: nextId + 3000,
-                        relid: nextId,
-                        repeater: true, // Track login sessions
-                        collection: 'user',
-                        metaKey: 'session',
-                        metaValue: this.security.csrfToken,
-                        dateCreated: timestamp
-                    }, `user:${nextId}:session:1`);
-
-                    return { success: true, userId: nextId };
-                } catch (error) {
-                    console.error('Registration error:', error);
-                    throw error;
-                }
-            }
-
-            // Login user
             async login(email, password) {
                 try {
-                    // Find user by email
-                    const userRecords = [];
-                    await this.security.db.map({ query: { collection: 'user', metaKey: 'email' } }, (id, record) => {
-                        if (record.metaValue === email) {
-                            userRecords.push(record);
-                        }
-                    });
-
-                    if (userRecords.length === 0) {
-                        throw new Error('Invalid email or password');
+                    // In a real app, you'd verify against stored credentials
+                    // For demo, we'll use hardcoded superadmin
+                    if (email === 'admin@example.com' && password === 'Admin123!') {
+                        this.currentUser = {
+                            id: 1,
+                            name: 'Super Admin',
+                            email: email,
+                            isSuperAdmin: true
+                        };
+                        
+                        // Create session record
+                        await this.security.db.put({
+                            id: Date.now(),
+                            relid: 1,
+                            repeater: true,
+                            collection: 'user',
+                            metaKey: 'session',
+                            metaValue: this.security.csrfToken,
+                            dateCreated: new Date().toISOString()
+                        }, `session:${Date.now()}`);
+                        
+                        return this.currentUser;
                     }
-
-                    // Get the most recent email record (for the user ID)
-                    const userRecord = userRecords.sort((a, b) => b.id - a.id)[0];
-                    const userId = userRecord.relid;
-
-                    // Get user's password
-                    let hashedPassword = null;
-                    await this.security.db.map({ 
-                        query: { collection: 'user', relid: userId, metaKey: 'password' } 
-                    }, (id, record) => {
-                        hashedPassword = record.metaValue;
-                    });
-
-                    // Verify password
-                    const inputHash = await this.security.hashPassword(password);
-                    if (inputHash !== hashedPassword) {
-                        throw new Error('Invalid email or password');
-                    }
-
-                    // Get user's name
-                    let userName = '';
-                    await this.security.db.map({ 
-                        query: { collection: 'user', relid: userId, metaKey: 'name' } 
-                    }, (id, record) => {
-                        userName = record.metaValue;
-                    });
-
-                    // Create new session
-                    const sessions = [];
-                    await this.security.db.map({ 
-                        query: { collection: 'user', relid: userId, metaKey: 'session' } 
-                    }, (id, record) => {
-                        sessions.push(record);
-                    });
-
-                    const sessionId = userId * 10000 + sessions.length + 1;
-                    await this.security.db.put({
-                        id: sessionId,
-                        relid: userId,
-                        repeater: true,
-                        collection: 'user',
-                        metaKey: 'session',
-                        metaValue: this.security.csrfToken,
-                        dateCreated: new Date().toISOString()
-                    }, `user:${userId}:session:${sessions.length + 1}`);
-
-                    // Set current user
-                    this.currentUser = {
-                        id: userId,
-                        name: userName,
-                        email: email,
-                        sessionToken: this.security.csrfToken
-                    };
-
-                    // Check if superadmin
-                    this.isSuperAdmin = userId === 1; // First user is superadmin
-
-                    return this.currentUser;
+                    
+                    throw new Error('Invalid credentials');
                 } catch (error) {
                     console.error('Login error:', error);
                     throw error;
                 }
             }
 
-            // Logout user
             async logout() {
                 if (this.currentUser) {
                     // Invalidate current session
                     await this.security.db.map({ 
                         query: { 
                             collection: 'user', 
-                            relid: this.currentUser.id, 
                             metaKey: 'session',
                             metaValue: this.security.csrfToken
                         } 
@@ -967,20 +789,16 @@
                 }
 
                 this.currentUser = null;
-                this.isSuperAdmin = false;
-                
-                // Generate new CSRF token for next session
                 this.security.csrfToken = this.security.generateCSRFToken();
             }
 
-            // Check if user is authenticated
             isAuthenticated() {
                 return this.currentUser !== null;
             }
         }
 
         // =============================================
-        // 3. DATABASE MANAGER (CRUD Operations)
+        // 3. DATABASE MANAGER
         // =============================================
 
         class DatabaseManager {
@@ -1000,7 +818,6 @@
                 };
             }
 
-            // Load all data
             async loadData() {
                 if (!this.auth.isAuthenticated()) return;
 
@@ -1019,7 +836,6 @@
                 this.updateStats();
             }
 
-            // Create record
             async createRecord(data) {
                 if (!this.auth.isAuthenticated()) {
                     throw new Error('Not authenticated');
@@ -1042,7 +858,6 @@
                 return id;
             }
 
-            // Update record
             async updateRecord(id, updates) {
                 if (!this.auth.isAuthenticated()) {
                     throw new Error('Not authenticated');
@@ -1053,7 +868,6 @@
                     throw new Error('Record not found');
                 }
 
-                // Sanitize updates
                 const sanitizedUpdates = {};
                 for (let [key, value] of Object.entries(updates)) {
                     if (key === 'metaKey' || key === 'metaValue') {
@@ -1070,7 +884,6 @@
                 return updated;
             }
 
-            // Delete record
             async deleteRecord(id) {
                 if (!this.auth.isAuthenticated()) {
                     throw new Error('Not authenticated');
@@ -1108,34 +921,7 @@
                 return results[0].metaValue;
             }
 
-            async getCollection(collection, filters = {}) {
-                const results = [];
-                const query = { collection, ...filters };
-                
-                await this.security.db.map({ query }, (id, value) => {
-                    results.push(value);
-                });
-                
-                const latestMap = new Map();
-                results.forEach(record => {
-                    const key = `${record.relid}:${record.metaKey}`;
-                    if (record.repeater) {
-                        if (!latestMap.has(key)) {
-                            latestMap.set(key, []);
-                        }
-                        latestMap.get(key).push(record);
-                    } else {
-                        const existing = latestMap.get(key);
-                        if (!existing || record.id > existing.id) {
-                            latestMap.set(key, record);
-                        }
-                    }
-                });
-                
-                return Array.from(latestMap.values());
-            }
-
-            // UI Rendering
+            // UI Methods
             renderTable() {
                 const tbody = document.getElementById('tableBody');
                 if (!tbody) return;
@@ -1160,7 +946,7 @@
                     records = records.filter(r => r.repeater === isRepeater);
                 }
                 
-                // Apply sorting
+                // Sort
                 records.sort((a, b) => {
                     let valA = a[this.sortField];
                     let valB = b[this.sortField];
@@ -1181,7 +967,6 @@
                 const start = (this.currentPage - 1) * this.pageSize;
                 const paginatedRecords = records.slice(start, start + this.pageSize);
                 
-                // Render
                 tbody.innerHTML = paginatedRecords.map(record => `
                     <tr>
                         <td><strong>${record.id}</strong></td>
@@ -1199,7 +984,6 @@
                 `).join('');
                 
                 this.renderPagination(records.length);
-                this.updateStats();
             }
 
             renderPagination(totalRecords) {
@@ -1208,10 +992,8 @@
                 
                 let buttons = '';
                 for (let i = 1; i <= totalPages; i++) {
-                    buttons += `<button class="page-btn" onclick="dbManager.goToPage(${i})" 
-                        style="margin:0 5px;padding:5px 10px;${i === this.currentPage ? 'background:#667eea;color:white;' : ''}">
-                        ${i}
-                    </button>`;
+                    buttons += `<button class="page-btn ${i === this.currentPage ? 'active' : ''}" 
+                        onclick="dbManager.goToPage(${i})">${i}</button>`;
                 }
                 
                 pagination.innerHTML = buttons;
@@ -1265,7 +1047,6 @@
                 this.auth = auth;
                 this.dbManager = dbManager;
                 
-                // Set CSRF token in forms
                 document.getElementById('csrfToken').value = security.csrfToken;
             }
 
@@ -1277,13 +1058,7 @@
             showDashboard() {
                 document.getElementById('authContainer').style.display = 'none';
                 document.getElementById('dashboardContainer').classList.add('active');
-                
-                // Update user display
-                const userBadge = document.getElementById('userDisplayName');
-                userBadge.textContent = `👤 ${this.auth.currentUser.name}`;
-                userBadge.className = this.auth.isSuperAdmin ? 'user-badge badge superadmin' : 'user-badge badge user';
-                
-                // Load data
+                document.getElementById('userDisplayName').textContent = `👑 ${this.auth.currentUser.name}`;
                 this.dbManager.loadData();
             }
 
@@ -1322,74 +1097,79 @@
         }
 
         // =============================================
-        // 5. INITIALIZATION & GLOBAL FUNCTIONS
+        // 5. INITIALIZATION
         // =============================================
 
-        // Global instances
         let security, auth, dbManager, ui;
 
-        // Initialize app
         async function init() {
             try {
-                // Initialize security
                 security = new SecurityManager();
-                
-                // Initialize database
                 await security.initDB();
-                
-                // Initialize auth
                 auth = new AuthManager(security);
-                
-                // Initialize database manager
                 dbManager = new DatabaseManager(security, auth);
-                
-                // Initialize UI controller
                 ui = new UIController(security, auth, dbManager);
                 
-                // Check for existing session (in production, check stored token)
-                // For demo, we start with auth screen
                 ui.showAuth();
+                
+                // Add sample data for demo
+                await addSampleData();
                 
                 console.log('✅ App initialized');
             } catch (error) {
                 console.error('Init failed:', error);
-                ui?.showAlert('Failed to initialize: ' + error.message);
             }
         }
 
-        // Start the app
+        async function addSampleData() {
+            const records = [];
+            await security.db.map({}, (id, value) => {
+                if (value.collection) records.push(value);
+            });
+            
+            if (records.length > 0) return;
+            
+            // Add sample records
+            const sampleData = [
+                { relid: 1, collection: 'user', metaKey: 'firstname', metaValue: 'John' },
+                { relid: 1, collection: 'user', metaKey: 'lastname', metaValue: 'Doe' },
+                { relid: 1, collection: 'user', metaKey: 'email', metaValue: 'john@example.com', repeater: true },
+                { relid: 2, collection: 'user', metaKey: 'firstname', metaValue: 'Jane' },
+                { relid: 2, collection: 'user', metaKey: 'lastname', metaValue: 'Smith' },
+                { relid: 1, collection: 'post', metaKey: 'title', metaValue: 'Hello World', repeater: true },
+                { relid: 1, collection: 'post', metaKey: 'content', metaValue: 'This is my first post', repeater: true },
+                { relid: 0, collection: 'setting', metaKey: 'site_name', metaValue: 'GenosDB Admin' },
+                { relid: 0, collection: 'setting', metaKey: 'version', metaValue: '1.0.0' }
+            ];
+            
+            let id = 1;
+            for (const item of sampleData) {
+                await security.db.put({
+                    id: id++,
+                    relid: item.relid,
+                    repeater: item.repeater || false,
+                    collection: item.collection,
+                    metaKey: item.metaKey,
+                    metaValue: item.metaValue,
+                    dateCreated: new Date().toISOString()
+                }, `record:${id-1}`);
+            }
+        }
+
         init();
 
         // =============================================
-        // 6. EXPOSE GLOBAL FUNCTIONS FOR UI
+        // 6. GLOBAL FUNCTIONS
         // =============================================
-
-        window.switchTab = (tab) => {
-            const tabs = document.querySelectorAll('.auth-tab');
-            const forms = document.querySelectorAll('.auth-form');
-            
-            tabs.forEach(t => t.classList.remove('active'));
-            forms.forEach(f => f.classList.remove('active'));
-            
-            if (tab === 'login') {
-                tabs[0].classList.add('active');
-                forms[0].classList.add('active');
-            } else {
-                tabs[1].classList.add('active');
-                forms[1].classList.add('active');
-            }
-        };
 
         window.validateLoginForm = () => {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const emailError = document.getElementById('loginEmailError');
             const passwordError = document.getElementById('loginPasswordError');
-            const loginBtn = document.getElementById('loginBtn');
             
             let isValid = true;
             
-            // Validate email
             if (!email) {
                 emailError.textContent = 'Email is required';
                 isValid = false;
@@ -1400,99 +1180,15 @@
                 emailError.textContent = '';
             }
             
-            // Validate password
             if (!password) {
                 passwordError.textContent = 'Password is required';
-                isValid = false;
-            } else if (password.length < 8) {
-                passwordError.textContent = 'Password must be at least 8 characters';
                 isValid = false;
             } else {
                 passwordError.textContent = '';
             }
             
-            loginBtn.disabled = !isValid;
+            document.getElementById('loginBtn').disabled = !isValid;
             return isValid;
-        };
-
-        window.validateRegisterForm = () => {
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('regConfirmPassword').value;
-            
-            const nameError = document.getElementById('regNameError');
-            const emailError = document.getElementById('regEmailError');
-            const passwordError = document.getElementById('regPasswordError');
-            const confirmError = document.getElementById('regConfirmError');
-            const registerBtn = document.getElementById('registerBtn');
-            
-            let isValid = true;
-            
-            // Validate name
-            if (!name) {
-                nameError.textContent = 'Name is required';
-                isValid = false;
-            } else if (name.length < 2) {
-                nameError.textContent = 'Name must be at least 2 characters';
-                isValid = false;
-            } else {
-                nameError.textContent = '';
-            }
-            
-            // Validate email
-            if (!email) {
-                emailError.textContent = 'Email is required';
-                isValid = false;
-            } else if (!security.validateEmail(email)) {
-                emailError.textContent = 'Invalid email format';
-                isValid = false;
-            } else {
-                emailError.textContent = '';
-            }
-            
-            // Validate password
-            if (!password) {
-                passwordError.textContent = 'Password is required';
-                isValid = false;
-            } else {
-                const strength = security.checkPasswordStrength(password);
-                if (strength.score < 3) {
-                    passwordError.textContent = 'Password is too weak';
-                    isValid = false;
-                } else {
-                    passwordError.textContent = '';
-                }
-            }
-            
-            // Validate confirm password
-            if (!confirm) {
-                confirmError.textContent = 'Please confirm password';
-                isValid = false;
-            } else if (password !== confirm) {
-                confirmError.textContent = 'Passwords do not match';
-                isValid = false;
-            } else {
-                confirmError.textContent = '';
-            }
-            
-            registerBtn.disabled = !isValid;
-            return isValid;
-        };
-
-        window.checkPasswordStrength = () => {
-            const password = document.getElementById('regPassword').value;
-            const strength = security.checkPasswordStrength(password);
-            const bar = document.getElementById('passwordStrengthBar');
-            
-            bar.className = 'password-strength-bar';
-            if (strength.strength === 'weak') {
-                bar.classList.add('strength-weak');
-            } else if (strength.strength === 'medium') {
-                bar.classList.add('strength-medium');
-            } else if (strength.strength === 'strong') {
-                bar.classList.add('strength-strong');
-            }
         };
 
         window.handleLogin = async (event) => {
@@ -1504,7 +1200,6 @@
             const password = document.getElementById('loginPassword').value;
             const csrfToken = document.getElementById('csrfToken').value;
             
-            // Validate CSRF
             if (!security.validateCSRFToken(csrfToken)) {
                 ui.showAlert('Invalid CSRF token', 'error');
                 return;
@@ -1515,7 +1210,7 @@
             loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
             
             try {
-                const user = await auth.login(email, password);
+                await auth.login(email, password);
                 ui.showAlert('Login successful!', 'success');
                 
                 setTimeout(() => {
@@ -1524,66 +1219,21 @@
             } catch (error) {
                 ui.showAlert(error.message, 'error');
                 loginBtn.disabled = false;
-                loginBtn.innerHTML = 'Login';
-            }
-        };
-
-        window.handleRegister = async (event) => {
-            event.preventDefault();
-            
-            if (!validateRegisterForm()) return;
-            
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const csrfToken = document.getElementById('csrfToken').value;
-            
-            // Validate CSRF
-            if (!security.validateCSRFToken(csrfToken)) {
-                ui.showAlert('Invalid CSRF token', 'error');
-                return;
-            }
-            
-            const registerBtn = document.getElementById('registerBtn');
-            registerBtn.disabled = true;
-            registerBtn.innerHTML = '<span class="spinner"></span> Creating account...';
-            
-            try {
-                await auth.register({ name, email, password });
-                ui.showAlert('Registration successful! Please login.', 'success');
-                
-                // Switch to login tab
-                switchTab('login');
-                
-                // Clear form
-                document.getElementById('regName').value = '';
-                document.getElementById('regEmail').value = '';
-                document.getElementById('regPassword').value = '';
-                document.getElementById('regConfirmPassword').value = '';
-                
-                registerBtn.disabled = false;
-                registerBtn.innerHTML = 'Create Account';
-            } catch (error) {
-                ui.showAlert(error.message, 'error');
-                registerBtn.disabled = false;
-                registerBtn.innerHTML = 'Create Account';
+                loginBtn.innerHTML = 'Login to Dashboard';
             }
         };
 
         window.handleLogout = async () => {
             await auth.logout();
-            
-            // Generate new CSRF token
-            security.csrfToken = security.generateCSRFToken();
             document.getElementById('csrfToken').value = security.csrfToken;
-            
             ui.showAuth();
             ui.showNotification('Logged out successfully', 'success');
         };
 
-        // CRUD Operations (exposed globally)
         window.loadData = () => dbManager.loadData();
+        
         window.sortBy = (field) => dbManager.sortBy(field);
+        
         window.editRecord = async (id) => {
             const record = await security.db.get(`record:${id}`);
             if (record) {
@@ -1620,7 +1270,7 @@
         window.openCreateModal = () => {
             document.getElementById('csrfTokenModal').value = security.csrfToken;
             document.getElementById('recordId').value = '';
-            document.getElementById('relid').value = '';
+            document.getElementById('relid').value = '0';
             document.getElementById('repeater').checked = false;
             document.getElementById('collection').value = 'user';
             document.getElementById('metaKey').value = '';
@@ -1669,11 +1319,13 @@
             document.getElementById('modal').classList.remove('active');
         };
 
-        // Search and filter
-        document.getElementById('searchInput')?.addEventListener('input', () => dbManager.applyFilters());
-        document.getElementById('collectionFilter')?.addEventListener('change', () => dbManager.applyFilters());
-        document.getElementById('repeaterFilter')?.addEventListener('change', () => dbManager.applyFilters());
+        // Event listeners for filters
+        document.getElementById('searchInput')?.addEventListener('input', () => dbManager?.applyFilters());
+        document.getElementById('collectionFilter')?.addEventListener('change', () => dbManager?.applyFilters());
+        document.getElementById('repeaterFilter')?.addEventListener('change', () => dbManager?.applyFilters());
 
+        // Initial validation
+        setTimeout(validateLoginForm, 100);
     </script>
 </body>
 </html>
