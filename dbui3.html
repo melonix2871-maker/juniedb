@@ -1,0 +1,2078 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GenusDB Console (GenosDB + GenosRTC)</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{
+      --bg: #0b0f19;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --faint: rgba(255,255,255,.45);
+      --line: rgba(255,255,255,.12);
+      --brand: #7c5cff;
+      --brand2: #21c7a8;
+      --danger: #ff4d6d;
+      --warn: #ffcc00;
+      --ok: #3ddc97;
+      --shadow: 0 16px 50px rgba(0,0,0,.45);
+      --radius: 16px;
+      --radius2: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    @media (prefers-color-scheme: light) {
+      :root{
+        --bg: #f6f7fb;
+        --panel: rgba(0,0,0,.045);
+        --panel2: rgba(0,0,0,.06);
+        --text: rgba(0,0,0,.88);
+        --muted: rgba(0,0,0,.62);
+        --faint: rgba(0,0,0,.45);
+        --line: rgba(0,0,0,.10);
+        --shadow: 0 16px 50px rgba(0,0,0,.12);
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background:
+        radial-gradient(1200px 700px at 10% 0%, rgba(124,92,255,.25), transparent 55%),
+        radial-gradient(900px 600px at 100% 30%, rgba(33,199,168,.18), transparent 60%),
+        var(--bg);
+      color: var(--text);
+    }
+    a{color:inherit}
+    .app{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+    .topbar{
+      position:sticky; top:0;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:14px 18px;
+      border-bottom:1px solid var(--line);
+      backdrop-filter: blur(10px);
+      background: color-mix(in oklab, var(--bg) 85%, transparent);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800;
+      letter-spacing:.2px;
+      user-select:none;
+    }
+    .logo{
+      width:34px; height:34px;
+      border-radius:12px;
+      background:
+        radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.55), transparent 55%),
+        linear-gradient(135deg, var(--brand), color-mix(in oklab, var(--brand2) 80%, var(--brand) 20%));
+      box-shadow: 0 10px 28px rgba(124,92,255,.24);
+      border:1px solid color-mix(in oklab, var(--brand) 35%, transparent);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:99px;
+      background: var(--faint);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--faint) 22%, transparent);
+    }
+    .dot.ok{background: var(--ok); box-shadow: 0 0 0 4px color-mix(in oklab, var(--ok) 22%, transparent);}
+    .dot.warn{background: var(--warn); box-shadow: 0 0 0 4px color-mix(in oklab, var(--warn) 22%, transparent);}
+    .dot.danger{background: var(--danger); box-shadow: 0 0 0 4px color-mix(in oklab, var(--danger) 22%, transparent);}
+    .spacer{flex:1}
+    .btn{
+      appearance:none;
+      border:1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      transition: transform .08s ease, background .12s ease, border-color .12s ease;
+      font-weight:650;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+    }
+    .btn:hover{background: var(--panel2)}
+    .btn:active{transform: translateY(1px)}
+    .btn.primary{
+      border-color: color-mix(in oklab, var(--brand) 45%, var(--line));
+      background: linear-gradient(135deg, color-mix(in oklab, var(--brand) 85%, #0000), color-mix(in oklab, var(--brand2) 60%, #0000));
+      box-shadow: 0 12px 30px rgba(124,92,255,.22);
+    }
+    .btn.danger{
+      border-color: color-mix(in oklab, var(--danger) 45%, var(--line));
+      background: color-mix(in oklab, var(--danger) 18%, var(--panel));
+    }
+    .btn.ghost{background:transparent}
+    .btn.small{padding:7px 10px; border-radius:10px; font-weight:650; font-size:12px}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+    .kbd{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding:2px 6px;
+      border-radius:8px;
+      border:1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+    }
+
+    .shell{
+      width:min(1240px, 100%);
+      margin:0 auto;
+      padding:18px;
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap:16px;
+      flex:1;
+    }
+    @media (max-width: 980px){
+      .shell{grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border:1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 14px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      border-bottom:1px solid var(--line);
+      background: color-mix(in oklab, var(--panel) 70%, transparent);
+    }
+    .card .hd h3{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .card .bd{padding:14px}
+    .card .ft{
+      padding:12px 14px;
+      border-top:1px solid var(--line);
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      align-items:center;
+      background: color-mix(in oklab, var(--panel) 70%, transparent);
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      padding:12px;
+    }
+    .nav .item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+      color: var(--muted);
+      background: transparent;
+    }
+    .nav .item:hover{background: var(--panel2)}
+    .nav .item.active{
+      background: color-mix(in oklab, var(--brand) 16%, var(--panel));
+      border-color: color-mix(in oklab, var(--brand) 22%, var(--line));
+      color: var(--text);
+    }
+    .ico{
+      width:22px;height:22px;
+      display:grid;place-items:center;
+      border-radius: 10px;
+      background: color-mix(in oklab, var(--panel2) 70%, transparent);
+      border:1px solid var(--line);
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:16px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns: 1fr}
+    }
+
+    label{display:block; font-size:12px; color: var(--muted); margin-bottom:6px}
+    input, textarea, select{
+      width:100%;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: color-mix(in oklab, var(--panel) 80%, transparent);
+      color: var(--text);
+      padding:10px 12px;
+      outline:none;
+      transition: border-color .12s ease, background .12s ease;
+      font-family: var(--sans);
+    }
+    textarea{min-height: 160px; font-family: var(--mono); font-size: 12px; line-height: 1.45}
+    input:focus, textarea:focus, select:focus{
+      border-color: color-mix(in oklab, var(--brand) 40%, var(--line));
+      background: color-mix(in oklab, var(--panel2) 60%, transparent);
+    }
+    .row{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+    .row3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px}
+    @media (max-width: 640px){ .row,.row3{grid-template-columns:1fr} }
+
+    .muted{color: var(--muted)}
+    .tiny{font-size:12px}
+    .mono{font-family: var(--mono)}
+    .list{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .itemRow{
+      display:flex; gap:10px; align-items:flex-start;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: color-mix(in oklab, var(--panel) 70%, transparent);
+    }
+    .itemRow:hover{background: color-mix(in oklab, var(--panel2) 70%, transparent)}
+    .itemRow .meta{flex:1; min-width:0}
+    .itemRow .title{
+      font-weight:750;
+      font-size:13px;
+      margin:0 0 4px 0;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .itemRow .sub{
+      font-size:12px;
+      color: var(--muted);
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .tag{
+      display:inline-flex; align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: var(--panel);
+      font-size:12px;
+      color: var(--muted);
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:16px;
+    }
+    @media (max-width: 980px){ .split{grid-template-columns:1fr} }
+    .toast{
+      position:fixed;
+      right:16px;
+      bottom:16px;
+      width:min(420px, calc(100% - 32px));
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      z-index:50;
+      pointer-events:none;
+    }
+    .toast .t{
+      pointer-events:auto;
+      padding:12px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: color-mix(in oklab, var(--panel2) 60%, var(--bg));
+      box-shadow: var(--shadow);
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      animation: pop .12s ease;
+    }
+    @keyframes pop{from{transform:translateY(6px); opacity:.4}to{transform:none; opacity:1}}
+    .toast .t .bar{width:6px; border-radius:999px; background: var(--brand); margin-top:3px}
+    .toast .t.ok .bar{background: var(--ok)}
+    .toast .t.warn .bar{background: var(--warn)}
+    .toast .t.bad .bar{background: var(--danger)}
+    .toast .t .c{flex:1}
+    .toast .t .c .h{font-weight:800; font-size:13px; margin:0 0 2px}
+    .toast .t .c .p{margin:0; font-size:12px; color: var(--muted)}
+    .hidden{display:none !important}
+
+    .loginWrap{
+      width:min(1040px, 100%);
+      margin:0 auto;
+      padding:18px;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){ .loginWrap{grid-template-columns:1fr} }
+    .hero{
+      padding:18px;
+      border-radius: var(--radius);
+      border:1px solid var(--line);
+      background:
+        radial-gradient(800px 420px at 10% 10%, rgba(124,92,255,.22), transparent 60%),
+        radial-gradient(700px 420px at 90% 40%, rgba(33,199,168,.16), transparent 55%),
+        var(--panel);
+      box-shadow: var(--shadow);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .hero h1{margin:0; font-size:28px; letter-spacing:-.3px}
+    .hero p{margin:0; color: var(--muted); line-height:1.55}
+    .hero .bul{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 640px){ .hero .bul{grid-template-columns:1fr} }
+    .bullet{
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: color-mix(in oklab, var(--panel2) 70%, transparent);
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .bullet b{display:block; font-size:13px}
+    .bullet span{display:block; font-size:12px; color: var(--muted); margin-top:2px; line-height:1.4}
+    .sep{height:1px;background:var(--line); margin:12px 0}
+    .miniTable{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      overflow:hidden;
+      background: color-mix(in oklab, var(--panel) 75%, transparent);
+    }
+    .miniTable th,.miniTable td{
+      font-size:12px;
+      padding:10px 10px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      color: var(--muted);
+      vertical-align:top;
+    }
+    .miniTable th{color: var(--text); background: color-mix(in oklab, var(--panel2) 70%, transparent)}
+    .miniTable tr:last-child td{border-bottom:none}
+    .code{
+      font-family: var(--mono);
+      font-size:12px;
+      white-space:pre-wrap;
+      word-break:break-word;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: color-mix(in oklab, var(--panel2) 55%, transparent);
+      color: color-mix(in oklab, var(--text) 90%, var(--muted));
+      line-height:1.45;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div style="display:flex; gap:10px; align-items:baseline;">
+            <div>GenusDB Console</div>
+            <span class="pill"><span class="dot" id="uiStatusDot"></span><span id="uiStatusText">Signed out</span></span>
+          </div>
+          <div class="tiny muted" id="uiSub">GenosDB + GenosRTC · Superadmin Console · SaaS/API-ready skeleton</div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn small ghost" id="btnOpenDocs" title="Opens the relevant docs in a new tab">Docs</button>
+      <button class="btn small" id="btnExport" title="Export your tenant config + API keys (local)">Export</button>
+      <button class="btn small" id="btnLogout">Logout</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginView" class="loginWrap">
+      <div class="hero">
+        <h1>Modern, simple admin GUI for a P2P database</h1>
+        <p>
+          This is a single-file <span class="mono">index.html</span> console built on top of <b>GenosDB</b> (browser-first P2P graph DB)
+          and <b>GenosRTC</b> (WebRTC layer). It includes:
+        </p>
+        <div class="bul">
+          <div class="bullet"><div class="ico">🔐</div><div><b>Authentication</b><span>Superadmin login (default <span class="mono">demo/demo</span>) with in-app credential settings.</span></div></div>
+          <div class="bullet"><div class="ico">🧩</div><div><b>SaaS-ready</b><span>Tenant config (db name, RTC, relays, encryption password) stored locally, exportable.</span></div></div>
+          <div class="bullet"><div class="ico">🔑</div><div><b>API-ready</b><span>API keys manager + an in-page API emulator to prove key validation + operations.</span></div></div>
+          <div class="bullet"><div class="ico">🕸️</div><div><b>GenosRTC</b><span>Peer list + realtime messages via data channels (no backend).</span></div></div>
+        </div>
+        <div class="sep"></div>
+        <div class="tiny muted">
+          Notes: This is a GUI + reference implementation. Real SaaS production use typically adds a backend for billing, org management, key rotation,
+          audit retention, and server-side API gateway. GenosDB itself can run purely client-side via CDN and supports <span class="mono">rtc: true</span>. 
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><h3>Superadmin Login</h3><span class="pill"><span class="dot warn"></span>Local demo auth</span></div>
+        <div class="bd">
+          <div class="row">
+            <div>
+              <label for="loginUser">Username</label>
+              <input id="loginUser" autocomplete="username" placeholder="demo" />
+            </div>
+            <div>
+              <label for="loginPass">Password</label>
+              <input id="loginPass" type="password" autocomplete="current-password" placeholder="demo" />
+            </div>
+          </div>
+          <div style="height:10px"></div>
+          <label>Tenant (DB) Name</label>
+          <input id="loginDbName" placeholder="genusdb-demo" />
+          <div style="height:10px"></div>
+          <div class="row">
+            <div>
+              <label>RTC (GenosRTC)</label>
+              <select id="loginRtc">
+                <option value="true">Enabled (P2P + room)</option>
+                <option value="false">Disabled (local-only)</option>
+              </select>
+            </div>
+            <div>
+              <label>RTC Encryption Password (optional)</label>
+              <input id="loginRtcPassword" placeholder="(optional) encrypt signaling data" />
+            </div>
+          </div>
+
+          <div style="height:10px"></div>
+          <label>Relay URLs (optional, comma-separated)</label>
+          <input id="loginRelays" placeholder="wss://relay.example.com, wss://relay2.example.com" />
+          <div class="tiny muted" style="margin-top:8px">
+            Tip: leave relays empty to use defaults. If you host your own relays, put them here.
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn" id="btnResetDemo" title="Resets superadmin credentials back to demo/demo">Reset to demo/demo</button>
+          <button class="btn primary" id="btnLogin">Enter Console</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP -->
+    <div id="appView" class="shell hidden">
+      <!-- LEFT NAV -->
+      <div class="card">
+        <div class="hd"><h3>Console</h3><span class="pill" title="Current tenant"><span class="dot ok"></span><span id="tenantPill">tenant</span></span></div>
+        <div class="nav" id="nav">
+          <div class="item active" data-view="dashboard"><div class="ico">📊</div><div><div style="font-weight:750">Dashboard</div><div class="tiny muted">Health + quick actions</div></div></div>
+          <div class="item" data-view="data"><div class="ico">🗂️</div><div><div style="font-weight:750">Data Explorer</div><div class="tiny muted">Collections + docs</div></div></div>
+          <div class="item" data-view="rtc"><div class="ico">🕸️</div><div><div style="font-weight:750">GenosRTC</div><div class="tiny muted">Peers + channels</div></div></div>
+          <div class="item" data-view="keys"><div class="ico">🔑</div><div><div style="font-weight:750">API Keys</div><div class="tiny muted">Create + revoke</div></div></div>
+          <div class="item" data-view="api"><div class="ico">⚡</div><div><div style="font-weight:750">API Console</div><div class="tiny muted">Keyed operations</div></div></div>
+          <div class="item" data-view="settings"><div class="ico">⚙️</div><div><div style="font-weight:750">Settings</div><div class="tiny muted">Superadmin + tenant</div></div></div>
+          <div class="item" data-view="audit"><div class="ico">🧾</div><div><div style="font-weight:750">Audit</div><div class="tiny muted">Local + DB events</div></div></div>
+        </div>
+        <div class="bd">
+          <div class="tiny muted">
+            <div><b class="muted">Shortcuts</b></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
+              <span class="kbd">Ctrl</span><span class="kbd">K</span><span class="tiny muted">Search (Data)</span>
+              <span class="kbd">Ctrl</span><span class="kbd">Enter</span><span class="tiny muted">Save (Editor)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div id="mainSlot" style="display:flex; flex-direction:column; gap:16px;"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <template id="tpl-dashboard">
+    <div class="grid">
+      <div class="card">
+        <div class="hd">
+          <h3>Tenant Health</h3>
+          <span class="pill"><span class="dot ok" id="dbDot"></span><span id="dbState">DB: ready</span></span>
+          <span class="pill"><span class="dot" id="rtcDot"></span><span id="rtcState">RTC: unknown</span></span>
+        </div>
+        <div class="bd">
+          <div class="row3">
+            <div>
+              <label>Tenant (DB) Name</label>
+              <div class="code" id="dashDbName"></div>
+            </div>
+            <div>
+              <label>Collections</label>
+              <div class="code" id="dashCollections">0</div>
+            </div>
+            <div>
+              <label>Docs</label>
+              <div class="code" id="dashDocs">0</div>
+            </div>
+          </div>
+          <div style="height:12px"></div>
+          <label>Quick Create</label>
+          <div class="row">
+            <div>
+              <input id="quickCollection" placeholder="Collection name (e.g. products)" />
+            </div>
+            <div style="display:flex; gap:10px">
+              <button class="btn primary" id="btnCreateCollection">Create Collection</button>
+              <button class="btn" id="btnSeedDemo">Seed Demo Data</button>
+            </div>
+          </div>
+          <div style="height:12px"></div>
+          <div class="tiny muted">
+            This console uses GenosDB’s core methods (<span class="mono">put/get/map/remove/link</span>) and GenosRTC room channels when enabled.
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn danger" id="btnWipeTenant" title="Deletes all nodes in this tenant">Wipe Tenant</button>
+          <button class="btn" id="btnGoData">Open Data Explorer</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><h3>Live Activity</h3><span class="pill"><span class="dot" id="liveDot"></span><span id="liveState">Listening…</span></span></div>
+        <div class="bd">
+          <div class="list" id="liveFeed"></div>
+          <div class="tiny muted" style="margin-top:10px">
+            Events come from <span class="mono">db.map()</span> realtime callbacks (<span class="mono">added/updated/removed</span>).
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-data">
+    <div class="split">
+      <div class="card">
+        <div class="hd">
+          <h3>Collections</h3>
+          <span class="pill"><span class="dot ok"></span><span id="colCount">0</span></span>
+          <div class="spacer"></div>
+          <input id="colSearch" placeholder="Search collections… (Ctrl+K)" style="max-width: 280px"/>
+          <button class="btn small" id="btnRefreshCols">Refresh</button>
+        </div>
+        <div class="bd">
+          <div class="list" id="colList"></div>
+        </div>
+        <div class="ft">
+          <input id="newColName" placeholder="New collection name" />
+          <button class="btn primary" id="btnAddCol">Add</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <h3>Document Editor</h3>
+          <span class="pill"><span class="dot ok"></span><span id="docScope">No collection</span></span>
+          <div class="spacer"></div>
+          <button class="btn small" id="btnNewDoc">New</button>
+          <button class="btn small" id="btnDeleteDoc">Delete</button>
+          <button class="btn small primary" id="btnSaveDoc" title="Ctrl+Enter">Save</button>
+        </div>
+        <div class="bd">
+          <div class="row">
+            <div>
+              <label>Doc Title</label>
+              <input id="docTitle" placeholder="Title" />
+            </div>
+            <div>
+              <label>Doc ID</label>
+              <input id="docId" class="mono" placeholder="(auto)" readonly />
+            </div>
+          </div>
+          <div style="height:10px"></div>
+          <label>JSON Data</label>
+          <textarea id="docJson" spellcheck="false">{}</textarea>
+          <div style="height:10px"></div>
+          <div class="row">
+            <div>
+              <label>Docs in collection</label>
+              <div class="list" id="docList"></div>
+            </div>
+            <div>
+              <label>Details</label>
+              <div class="code" id="docMeta">Select a doc…</div>
+              <div style="height:10px"></div>
+              <label>Link this doc → another doc</label>
+              <div class="row">
+                <input id="linkTargetId" class="mono" placeholder="Target Doc ID" />
+                <button class="btn" id="btnLink">Link</button>
+              </div>
+              <div class="tiny muted" style="margin-top:8px">
+                Links are directed edges via <span class="mono">db.link(sourceId, targetId)</span>.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn" id="btnExportDoc">Copy Doc JSON</button>
+          <button class="btn" id="btnImportDoc">Paste JSON into Editor</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-rtc">
+    <div class="grid">
+      <div class="card">
+        <div class="hd">
+          <h3>Peers</h3>
+          <span class="pill"><span class="dot" id="peersDot"></span><span id="peersCount">0</span></span>
+          <div class="spacer"></div>
+          <button class="btn small" id="btnPingAll">Ping all</button>
+          <button class="btn small" id="btnLeaveRoom">Leave room</button>
+        </div>
+        <div class="bd">
+          <div class="list" id="peersList"></div>
+          <div class="tiny muted" style="margin-top:10px">
+            Uses GenosRTC <span class="mono">db.room</span> events (<span class="mono">peer:join / peer:leave</span>) and <span class="mono">getPeers()</span>.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <h3>Data Channel: <span class="mono">genus</span></h3>
+          <span class="pill"><span class="dot ok"></span><span id="chanState">Ready</span></span>
+        </div>
+        <div class="bd">
+          <label>Message</label>
+          <div class="row">
+            <input id="rtcMsg" placeholder="Say something to peers…" />
+            <button class="btn primary" id="btnSendRtc">Send</button>
+          </div>
+          <div style="height:12px"></div>
+          <label>Channel Log</label>
+          <div class="code" id="rtcLog" style="min-height: 240px; max-height: 360px; overflow:auto;"></div>
+        </div>
+        <div class="ft">
+          <button class="btn" id="btnClearRtcLog">Clear</button>
+          <button class="btn" id="btnAnnouncePresence">Announce presence</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-keys">
+    <div class="grid">
+      <div class="card">
+        <div class="hd"><h3>API Keys</h3><span class="pill"><span class="dot ok"></span><span id="keysCount">0</span></span></div>
+        <div class="bd">
+          <div class="row">
+            <div>
+              <label>Label</label>
+              <input id="keyLabel" placeholder="e.g. staging, mobile-app, partner-x" />
+            </div>
+            <div>
+              <label>Permissions</label>
+              <select id="keyPerms">
+                <option value="read">read</option>
+                <option value="read,write">read,write</option>
+                <option value="read,write,delete">read,write,delete</option>
+                <option value="admin">admin</option>
+              </select>
+            </div>
+          </div>
+          <div style="height:10px"></div>
+          <button class="btn primary" id="btnGenerateKey">Generate Key</button>
+          <div style="height:12px"></div>
+          <label>Last Generated Key (copy now — stored as hash)</label>
+          <div class="code" id="lastKey">—</div>
+          <div class="tiny muted" style="margin-top:8px">
+            Keys are stored as hashes in the DB. This console shows the raw key once when created.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <h3>Active Keys</h3>
+          <div class="spacer"></div>
+          <button class="btn small" id="btnRefreshKeys">Refresh</button>
+        </div>
+        <div class="bd">
+          <div class="list" id="keysList"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-api">
+    <div class="card">
+      <div class="hd">
+        <h3>API Console (Emulator)</h3>
+        <span class="pill"><span class="dot ok"></span><span>Keyed calls</span></span>
+        <div class="spacer"></div>
+        <button class="btn small" id="btnCopyCurl">Copy curl examples</button>
+      </div>
+      <div class="bd">
+        <div class="row">
+          <div>
+            <label>API Key</label>
+            <input id="apiKeyInput" class="mono" placeholder="paste API key here" />
+          </div>
+          <div>
+            <label>Action</label>
+            <select id="apiAction">
+              <option value="listCollections">listCollections</option>
+              <option value="listDocs">listDocs</option>
+              <option value="getDoc">getDoc</option>
+              <option value="putDoc">putDoc</option>
+              <option value="deleteDoc">deleteDoc</option>
+            </select>
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="row">
+          <div>
+            <label>Collection</label>
+            <input id="apiCollection" placeholder="e.g. products" />
+          </div>
+          <div>
+            <label>Doc ID (for get/delete)</label>
+            <input id="apiDocId" class="mono" placeholder="doc id" />
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <label>Payload JSON (for putDoc)</label>
+        <textarea id="apiPayload" spellcheck="false">{"title":"Example","data":{"hello":"world"}}</textarea>
+        <div style="height:10px"></div>
+        <button class="btn primary" id="btnRunApi">Run API Request</button>
+        <div style="height:12px"></div>
+        <label>Response</label>
+        <div class="code" id="apiResponse" style="min-height: 220px"></div>
+
+        <div class="sep"></div>
+        <label>How to wire a real API gateway (reference)</label>
+        <table class="miniTable">
+          <thead><tr><th>Endpoint</th><th>What it does</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">GET /v1/collections</td><td>List collections</td><td>Validate key → query DB</td></tr>
+            <tr><td class="mono">GET /v1/docs?collection=…</td><td>List docs</td><td>Uses <span class="mono">db.map({query:{type:'doc',collection}})</span></td></tr>
+            <tr><td class="mono">GET /v1/docs/:id</td><td>Get doc</td><td>Uses <span class="mono">db.get(id)</span></td></tr>
+            <tr><td class="mono">PUT /v1/docs</td><td>Upsert doc</td><td>Uses <span class="mono">db.put(value,id?)</span></td></tr>
+            <tr><td class="mono">DELETE /v1/docs/:id</td><td>Delete doc</td><td>Uses <span class="mono">db.remove(id)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-settings">
+    <div class="grid">
+      <div class="card">
+        <div class="hd"><h3>Superadmin Credentials</h3><span class="pill"><span class="dot warn"></span>Local only</span></div>
+        <div class="bd">
+          <div class="row">
+            <div>
+              <label>Username</label>
+              <input id="saUser" autocomplete="username" />
+            </div>
+            <div>
+              <label>Password</label>
+              <input id="saPass" type="password" autocomplete="new-password" />
+            </div>
+          </div>
+          <div class="tiny muted" style="margin-top:10px">
+            Stored locally in your browser. For production, connect this to a real identity system (WebAuthn / SSO / etc).
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn" id="btnResetCreds">Reset to demo/demo</button>
+          <button class="btn primary" id="btnSaveCreds">Save</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><h3>Tenant + Networking</h3><span class="pill"><span class="dot ok"></span>Live</span></div>
+        <div class="bd">
+          <label>Tenant DB Name</label>
+          <input id="setDbName" />
+          <div style="height:10px"></div>
+          <div class="row">
+            <div>
+              <label>RTC (GenosRTC)</label>
+              <select id="setRtc">
+                <option value="true">Enabled</option>
+                <option value="false">Disabled</option>
+              </select>
+            </div>
+            <div>
+              <label>RTC Password (optional)</label>
+              <input id="setRtcPassword" />
+            </div>
+          </div>
+          <div style="height:10px"></div>
+          <label>Relay URLs (comma-separated)</label>
+          <input id="setRelays" />
+          <div class="tiny muted" style="margin-top:10px">
+            Changing tenant settings requires reloading the DB connection.
+          </div>
+        </div>
+        <div class="ft">
+          <button class="btn" id="btnReconnect">Reconnect</button>
+          <button class="btn danger" id="btnFactoryReset">Factory Reset (local)</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-audit">
+    <div class="card">
+      <div class="hd">
+        <h3>Audit Log</h3>
+        <span class="pill"><span class="dot ok"></span><span id="auditCount">0</span></span>
+        <div class="spacer"></div>
+        <button class="btn small" id="btnClearAudit">Clear</button>
+      </div>
+      <div class="bd">
+        <div class="list" id="auditList"></div>
+      </div>
+    </div>
+  </template>
+
+  <script type="module">
+    /**
+     * GenosDB CDN import (browser usage)
+     * Docs show using: import { gdb } from "https://cdn.jsdelivr.net/npm/genosdb@latest/dist/index.min.js"
+     * and enabling rtc via { rtc: true } or { rtc: { relayUrls, turnConfig, cells } }.
+     */
+    import { gdb } from "https://cdn.jsdelivr.net/npm/genosdb@latest/dist/index.min.js";
+
+    // ---------------------------
+    // Utilities
+    // ---------------------------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    function nowIso(){ return new Date().toISOString(); }
+
+    function toast(type, title, msg){
+      const host = $("#toast");
+      const el = document.createElement("div");
+      el.className = `t ${type === "ok" ? "ok" : type === "warn" ? "warn" : type === "bad" ? "bad" : ""}`;
+      el.innerHTML = `
+        <div class="bar"></div>
+        <div class="c">
+          <p class="h">${escapeHtml(title)}</p>
+          <p class="p">${escapeHtml(msg || "")}</p>
+        </div>
+        <button class="btn small ghost" style="pointer-events:auto" aria-label="Close">✕</button>
+      `;
+      host.appendChild(el);
+      const btn = el.querySelector("button");
+      btn.addEventListener("click", () => el.remove());
+      setTimeout(() => { if (el.isConnected) el.remove(); }, 5200);
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function safeJsonParse(text){
+      try{ return { ok:true, value: JSON.parse(text) }; }
+      catch(e){ return { ok:false, error: e?.message || String(e) }; }
+    }
+
+    // SHA-256 (for API key storage as hash)
+    async function sha256Hex(str){
+      const enc = new TextEncoder().encode(str);
+      const buf = await crypto.subtle.digest("SHA-256", enc);
+      const arr = Array.from(new Uint8Array(buf));
+      return arr.map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+
+    function randomKey(){
+      const bytes = new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      // URL-safe base64
+      let b64 = btoa(String.fromCharCode(...bytes));
+      return b64.replaceAll("+","-").replaceAll("/","_").replaceAll("=","");
+    }
+
+    // ---------------------------
+    // Local "SaaS-ready" config
+    // ---------------------------
+    const LS = {
+      CFG: "genusdb:tenantConfig:v1",
+      SA:  "genusdb:superadminCreds:v1",
+      SES: "genusdb:session:v1",
+      AUD: "genusdb:audit:v1"
+    };
+
+    const defaultConfig = {
+      tenantDbName: "genusdb-demo",
+      rtcEnabled: true,
+      rtcPassword: "",
+      relayUrls: [], // optional
+    };
+
+    const defaultCreds = {
+      username: "demo",
+      // store password hash (still local-only demo)
+      passwordHash: null,
+    };
+
+    async function ensureDefaults(){
+      if (!localStorage.getItem(LS.CFG)) localStorage.setItem(LS.CFG, JSON.stringify(defaultConfig));
+      if (!localStorage.getItem(LS.SA)) {
+        const c = structuredClone(defaultCreds);
+        c.passwordHash = await sha256Hex("demo");
+        localStorage.setItem(LS.SA, JSON.stringify(c));
+      }
+      if (!localStorage.getItem(LS.AUD)) localStorage.setItem(LS.AUD, JSON.stringify([]));
+    }
+
+    function readConfig(){
+      try{ return JSON.parse(localStorage.getItem(LS.CFG) || "null") || structuredClone(defaultConfig); }
+      catch{ return structuredClone(defaultConfig); }
+    }
+    function writeConfig(cfg){ localStorage.setItem(LS.CFG, JSON.stringify(cfg)); }
+
+    function readCreds(){
+      try{ return JSON.parse(localStorage.getItem(LS.SA) || "null") || null; }
+      catch{ return null; }
+    }
+    function writeCreds(c){ localStorage.setItem(LS.SA, JSON.stringify(c)); }
+
+    function setSession(s){ localStorage.setItem(LS.SES, JSON.stringify(s)); }
+    function getSession(){
+      try{ return JSON.parse(localStorage.getItem(LS.SES) || "null"); }
+      catch{ return null; }
+    }
+    function clearSession(){ localStorage.removeItem(LS.SES); }
+
+    function auditPush(action, details){
+      const item = { ts: nowIso(), action, details };
+      const arr = JSON.parse(localStorage.getItem(LS.AUD) || "[]");
+      arr.unshift(item);
+      localStorage.setItem(LS.AUD, JSON.stringify(arr.slice(0, 250)));
+      renderAuditIfOpen();
+    }
+
+    // ---------------------------
+    // GenosDB runtime state
+    // ---------------------------
+    let db = null;
+    let room = null;
+    let rtcChannel = null;
+
+    let unsubLive = null;
+    let unsubCollections = null;
+    let unsubDocs = null;
+    let unsubKeys = null;
+
+    let selectedCollection = null;
+    let selectedDocId = null;
+
+    // Cached maps
+    let cacheCollections = new Map(); // id -> value
+    let cacheDocs = new Map();        // id -> value
+    let cacheKeys = new Map();        // id -> value
+
+    // ---------------------------
+    // Connection
+    // ---------------------------
+    async function connectDb(){
+      const cfg = readConfig();
+
+      // Clean up old listeners
+      try{ if (unsubLive) unsubLive(); } catch {}
+      try{ if (unsubCollections) unsubCollections(); } catch {}
+      try{ if (unsubDocs) unsubDocs(); } catch {}
+      try{ if (unsubKeys) unsubKeys(); } catch {}
+      unsubLive = unsubCollections = unsubDocs = unsubKeys = null;
+
+      db = null; room = null; rtcChannel = null;
+
+      const options = {};
+      if (cfg.rtcEnabled) {
+        // GenosDB API expects rtc: true OR rtc: { relayUrls, turnConfig, cells }.
+        // We’ll pass relayUrls if provided. Password is optional for encrypting signaling data.
+        if (cfg.relayUrls?.length) options.rtc = { relayUrls: cfg.relayUrls };
+        else options.rtc = true;
+        if (cfg.rtcPassword?.trim()) options.password = cfg.rtcPassword.trim();
+      }
+      // Create / open DB
+      db = await gdb(cfg.tenantDbName, options);
+
+      // Attach GenosRTC room if enabled
+      if (cfg.rtcEnabled && db.room) {
+        room = db.room;
+        rtcChannel = room.channel("genus"); // <= 12 bytes
+        wireRtc();
+      }
+
+      auditPush("db.connect", { tenantDbName: cfg.tenantDbName, rtcEnabled: cfg.rtcEnabled, relays: cfg.relayUrls?.length || 0 });
+
+      // Live feed subscription (all collection/doc/key nodes)
+      cacheCollections.clear();
+      cacheDocs.clear();
+      cacheKeys.clear();
+      unsubLive = await subscribeLiveFeed();
+
+      // Preload counts
+      await refreshDashboardCounts();
+
+      // Update UI badges
+      setUiSignedIn();
+      toast("ok", "Connected", `Tenant: ${cfg.tenantDbName}${cfg.rtcEnabled ? " (RTC on)" : ""}`);
+    }
+
+    function wireRtc(){
+      // Peer join/leave events
+      room.on("peer:join", (peerId) => {
+        auditPush("rtc.peer.join", { peerId });
+        appendRtcLog(`+ peer joined: ${peerId}`);
+        renderPeersIfOpen();
+      });
+      room.on("peer:leave", (peerId) => {
+        auditPush("rtc.peer.leave", { peerId });
+        appendRtcLog(`- peer left: ${peerId}`);
+        renderPeersIfOpen();
+      });
+
+      // Data channel messages
+      rtcChannel.on("message", (data, peerId) => {
+        const line = `[${new Date().toLocaleTimeString()}] ${peerId}: ${typeof data === "string" ? data : JSON.stringify(data)}`;
+        appendRtcLog(line);
+        auditPush("rtc.channel.message", { from: peerId, data });
+      });
+    }
+
+    async function subscribeLiveFeed(){
+      const liveFeed = $("#liveFeed");
+      if (liveFeed) liveFeed.innerHTML = "";
+
+      const { unsubscribe } = await db.map(({ id, value, action }) => {
+        // value may be null on removed
+        if (value?.type === "collection") cacheCollections.set(id, value);
+        if (value?.type === "doc") cacheDocs.set(id, value);
+        if (value?.type === "apikey") cacheKeys.set(id, value);
+        if (action === "removed") {
+          cacheCollections.delete(id);
+          cacheDocs.delete(id);
+          cacheKeys.delete(id);
+        }
+
+        // update counters if dashboard open
+        const v = currentView();
+        if (v === "dashboard") {
+          $("#dashCollections") && ($("#dashCollections").textContent = String(countCollections()));
+          $("#dashDocs") && ($("#dashDocs").textContent = String(countDocs()));
+        }
+        if (v === "keys") {
+          $("#keysCount") && ($("#keysCount").textContent = String(countKeys()));
+        }
+
+        // activity item
+        if (liveFeed && (value?.type === "collection" || value?.type === "doc" || value?.type === "apikey")) {
+          const el = document.createElement("div");
+          el.className = "itemRow";
+          const t = value?.type || "(unknown)";
+          const title = t === "doc" ? (value.title || "(untitled)") :
+                        t === "collection" ? (value.name || "(unnamed)") :
+                        t === "apikey" ? (value.label || "(key)") : t;
+          const scope = t === "doc" ? `collection=${value.collection}` : "";
+          el.innerHTML = `
+            <div class="ico">${action === "added" ? "➕" : action === "updated" ? "✏️" : "🗑️"}</div>
+            <div class="meta">
+              <p class="title">${escapeHtml(title)}</p>
+              <div class="sub">
+                <span class="tag">${escapeHtml(t)}</span>
+                <span class="tag">${escapeHtml(action)}</span>
+                ${scope ? `<span class="tag">${escapeHtml(scope)}</span>` : ``}
+                <span class="tag mono">${escapeHtml(id.slice(0,10))}…</span>
+              </div>
+            </div>
+          `;
+          liveFeed.prepend(el);
+          while (liveFeed.children.length > 8) liveFeed.lastChild.remove();
+        }
+      });
+
+      return unsubscribe;
+    }
+
+    function countCollections(){ return Array.from(cacheCollections.values()).filter(v => v?.type === "collection").length; }
+    function countDocs(){ return Array.from(cacheDocs.values()).filter(v => v?.type === "doc").length; }
+    function countKeys(){ return Array.from(cacheKeys.values()).filter(v => v?.type === "apikey" && v?.revoked !== true).length; }
+
+    // ---------------------------
+    // Auth
+    // ---------------------------
+    async function login(username, password){
+      const c = readCreds();
+      if (!c) return false;
+      const hash = await sha256Hex(password);
+      const ok = (username === c.username && hash === c.passwordHash);
+      if (ok) setSession({ user: username, ts: nowIso() });
+      return ok;
+    }
+
+    async function resetToDemoCreds(){
+      const c = { username: "demo", passwordHash: await sha256Hex("demo") };
+      writeCreds(c);
+      toast("ok", "Reset", "Superadmin credentials set to demo/demo");
+    }
+
+    // ---------------------------
+    // View routing
+    // ---------------------------
+    function currentView(){
+      const active = $("#nav .item.active");
+      return active?.dataset?.view || "dashboard";
+    }
+
+    function setActiveView(name){
+      $$("#nav .item").forEach(x => x.classList.toggle("active", x.dataset.view === name));
+      renderView(name);
+    }
+
+    function mountTemplate(id){
+      const tpl = document.getElementById(id);
+      const node = tpl.content.cloneNode(true);
+      const slot = $("#mainSlot");
+      slot.innerHTML = "";
+      slot.appendChild(node);
+    }
+
+    // ---------------------------
+    // Dashboard
+    // ---------------------------
+    async function refreshDashboardCounts(){
+      // If cache is empty, do a quick static map to warm it (optional)
+      // Live subscription already builds cache as events come in. This just ensures counts are accurate early.
+      try{
+        const { results: cols } = await db.map({ query: { type: "collection" } });
+        cols?.forEach(n => cacheCollections.set(n.id || n._id || n.key || crypto.randomUUID(), n.value || n));
+      } catch {}
+      try{
+        const { results: docs } = await db.map({ query: { type: "doc" } });
+        docs?.forEach(n => cacheDocs.set(n.id || n._id || n.key || crypto.randomUUID(), n.value || n));
+      } catch {}
+      try{
+        const { results: keys } = await db.map({ query: { type: "apikey" } });
+        keys?.forEach(n => cacheKeys.set(n.id || n._id || n.key || crypto.randomUUID(), n.value || n));
+      } catch {}
+    }
+
+    async function renderDashboard(){
+      mountTemplate("tpl-dashboard");
+
+      const cfg = readConfig();
+      $("#dashDbName").textContent = cfg.tenantDbName;
+      $("#dashCollections").textContent = String(countCollections());
+      $("#dashDocs").textContent = String(countDocs());
+
+      $("#dbState").textContent = "DB: ready";
+      $("#rtcState").textContent = cfg.rtcEnabled ? "RTC: enabled" : "RTC: disabled";
+      $("#rtcDot").classList.toggle("ok", !!cfg.rtcEnabled);
+      $("#rtcDot").classList.toggle("warn", !cfg.rtcEnabled);
+
+      // Live status dot
+      $("#liveState").textContent = "Listening…";
+      $("#liveDot").classList.add(cfg.rtcEnabled ? "ok" : "");
+
+      $("#btnGoData").addEventListener("click", () => setActiveView("data"));
+
+      $("#btnCreateCollection").addEventListener("click", async () => {
+        const name = ($("#quickCollection").value || "").trim();
+        if (!name) return toast("warn","Missing","Enter a collection name.");
+        await createCollection(name);
+        $("#quickCollection").value = "";
+        toast("ok","Created",`Collection "${name}" added.`);
+      });
+
+      $("#btnSeedDemo").addEventListener("click", async () => {
+        await seedDemo();
+      });
+
+      $("#btnWipeTenant").addEventListener("click", async () => {
+        const ok = confirm("Wipe ALL nodes in this tenant? This cannot be undone.");
+        if (!ok) return;
+        await db.clear();
+        cacheCollections.clear(); cacheDocs.clear(); cacheKeys.clear();
+        auditPush("db.clear", { tenantDbName: cfg.tenantDbName });
+        toast("ok", "Wiped", "Tenant data cleared.");
+        await refreshDashboardCounts();
+        $("#dashCollections").textContent = "0";
+        $("#dashDocs").textContent = "0";
+      });
+    }
+
+    async function createCollection(name){
+      const value = { type: "collection", name, createdAt: nowIso() };
+      const id = await db.put(value);
+      auditPush("collection.create", { id, name });
+      return id;
+    }
+
+    async function seedDemo(){
+      const base = "products";
+      // ensure collection exists
+      const existing = Array.from(cacheCollections.entries()).find(([,v]) => v?.type==="collection" && v?.name===base);
+      if (!existing) await createCollection(base);
+
+      const docs = [
+        { title: "Hibla Poncho", data: { sku:"HIB-PON-01", price: 79.00, tags:["fashion","poncho"], stock: 12 } },
+        { title: "Bolero Blouse", data: { sku:"HIB-BOL-02", price: 49.00, tags:["fashion","blouse"], stock: 34 } },
+        { title: "Barong Suit", data: { sku:"HIB-BAR-10", price: 199.00, tags:["formal"], stock: 6 } },
+      ];
+      for (const d of docs){
+        const value = { type:"doc", collection: base, title: d.title, data: d.data, updatedAt: nowIso(), createdAt: nowIso() };
+        const id = await db.put(value);
+        auditPush("doc.put", { id, collection: base, title: d.title });
+      }
+      toast("ok","Seeded","Added demo collection + docs.");
+      if (currentView() === "data") await renderDataExplorer(); // refresh UI if needed
+      if (currentView() === "dashboard") {
+        $("#dashCollections").textContent = String(countCollections());
+        $("#dashDocs").textContent = String(countDocs());
+      }
+    }
+
+    // ---------------------------
+    // Data Explorer
+    // ---------------------------
+    async function renderDataExplorer(){
+      mountTemplate("tpl-data");
+
+      selectedCollection = selectedCollection || null;
+      selectedDocId = null;
+
+      // search shortcut
+      window.addEventListener("keydown", (e) => {
+        const v = currentView();
+        if (v !== "data") return;
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+          e.preventDefault();
+          $("#colSearch").focus();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          e.preventDefault();
+          $("#btnSaveDoc").click();
+        }
+      }, { once:true });
+
+      $("#btnRefreshCols").addEventListener("click", refreshCollectionsUI);
+      $("#btnAddCol").addEventListener("click", async () => {
+        const name = ($("#newColName").value || "").trim();
+        if (!name) return toast("warn","Missing","Enter a collection name.");
+        await createCollection(name);
+        $("#newColName").value = "";
+        await refreshCollectionsUI();
+      });
+      $("#colSearch").addEventListener("input", refreshCollectionsUI);
+
+      $("#btnNewDoc").addEventListener("click", () => {
+        if (!selectedCollection) return toast("warn","No collection","Pick a collection first.");
+        selectedDocId = null;
+        $("#docId").value = "";
+        $("#docTitle").value = "";
+        $("#docJson").value = "{}";
+        $("#docMeta").textContent = "New doc…";
+      });
+
+      $("#btnSaveDoc").addEventListener("click", async () => {
+        if (!selectedCollection) return toast("warn","No collection","Pick a collection first.");
+        const title = ($("#docTitle").value || "").trim() || "(untitled)";
+        const parsed = safeJsonParse($("#docJson").value || "{}");
+        if (!parsed.ok) return toast("bad","Invalid JSON", parsed.error);
+        const value = {
+          type: "doc",
+          collection: selectedCollection,
+          title,
+          data: parsed.value,
+          updatedAt: nowIso(),
+          createdAt: selectedDocId ? (cacheDocs.get(selectedDocId)?.createdAt || nowIso()) : nowIso(),
+        };
+        const id = await db.put(value, selectedDocId || undefined);
+        selectedDocId = id;
+        $("#docId").value = id;
+        $("#docMeta").textContent = JSON.stringify({ id, collection: selectedCollection, updatedAt: value.updatedAt }, null, 2);
+        auditPush("doc.put", { id, collection: selectedCollection, title });
+        toast("ok","Saved", `Doc saved (${id.slice(0,10)}…).`);
+        await refreshDocsUI();
+      });
+
+      $("#btnDeleteDoc").addEventListener("click", async () => {
+        if (!selectedDocId) return toast("warn","No doc","Select a document first.");
+        const ok = confirm("Delete this doc?");
+        if (!ok) return;
+        await db.remove(selectedDocId);
+        auditPush("doc.remove", { id: selectedDocId });
+        toast("ok","Deleted","Doc removed.");
+        selectedDocId = null;
+        $("#docId").value = "";
+        $("#docTitle").value = "";
+        $("#docJson").value = "{}";
+        $("#docMeta").textContent = "Select a doc…";
+        await refreshDocsUI();
+      });
+
+      $("#btnLink").addEventListener("click", async () => {
+        if (!selectedDocId) return toast("warn","No source","Select a source doc first.");
+        const targetId = ($("#linkTargetId").value || "").trim();
+        if (!targetId) return toast("warn","Missing","Enter a target doc ID.");
+        await db.link(selectedDocId, targetId);
+        auditPush("doc.link", { sourceId: selectedDocId, targetId });
+        toast("ok","Linked","Edge created.");
+      });
+
+      $("#btnExportDoc").addEventListener("click", async () => {
+        const parsed = safeJsonParse($("#docJson").value || "{}");
+        if (!parsed.ok) return toast("bad","Invalid JSON", parsed.error);
+        await navigator.clipboard.writeText(JSON.stringify(parsed.value, null, 2));
+        toast("ok","Copied","Doc JSON copied to clipboard.");
+      });
+
+      $("#btnImportDoc").addEventListener("click", async () => {
+        const txt = prompt("Paste JSON:");
+        if (!txt) return;
+        const parsed = safeJsonParse(txt);
+        if (!parsed.ok) return toast("bad","Invalid JSON", parsed.error);
+        $("#docJson").value = JSON.stringify(parsed.value, null, 2);
+        toast("ok","Loaded","JSON pasted into editor.");
+      });
+
+      await refreshCollectionsUI();
+      await refreshDocsUI();
+    }
+
+    async function refreshCollectionsUI(){
+      const q = ($("#colSearch")?.value || "").trim().toLowerCase();
+      const { results } = await db.map({ query: { type: "collection" }, field: "name", order: "asc" });
+      const list = $("#colList");
+      list.innerHTML = "";
+
+      const rows = (results || []).map(r => {
+        // results in docs mention returning `results` (array). In practice, items may include id/value.
+        // Handle both shapes.
+        const id = r.id || r.key || r._id || r?.result?.id || "";
+        const value = r.value || r;
+        return { id, value };
+      }).filter(x => x.value?.type === "collection");
+
+      $("#colCount").textContent = String(rows.length);
+
+      for (const { id, value } of rows){
+        const name = value.name || "(unnamed)";
+        if (q && !name.toLowerCase().includes(q)) continue;
+
+        const el = document.createElement("div");
+        el.className = "itemRow";
+        el.style.cursor = "pointer";
+        el.innerHTML = `
+          <div class="ico">${selectedCollection === name ? "✅" : "🗂️"}</div>
+          <div class="meta">
+            <p class="title">${escapeHtml(name)}</p>
+            <div class="sub">
+              <span class="tag mono">${escapeHtml(id ? id.slice(0,10) : "—")}…</span>
+              <span class="tag">created ${escapeHtml((value.createdAt||"").slice(0,10) || "—")}</span>
+            </div>
+          </div>
+        `;
+        el.addEventListener("click", async () => {
+          selectedCollection = name;
+          $("#docScope").textContent = `collection=${name}`;
+          await refreshCollectionsUI();
+          await refreshDocsUI();
+        });
+        list.appendChild(el);
+      }
+
+      if (!selectedCollection && rows.length){
+        selectedCollection = rows[0].value.name;
+        $("#docScope").textContent = `collection=${selectedCollection}`;
+      } else {
+        $("#docScope").textContent = selectedCollection ? `collection=${selectedCollection}` : "No collection";
+      }
+    }
+
+    async function refreshDocsUI(){
+      const docList = $("#docList");
+      docList.innerHTML = "";
+      if (!selectedCollection) return;
+
+      const { results } = await db.map({ query: { type: "doc", collection: selectedCollection }, field: "updatedAt", order: "desc" });
+
+      const rows = (results || []).map(r => {
+        const id = r.id || r.key || r._id || "";
+        const value = r.value || r;
+        return { id, value };
+      }).filter(x => x.value?.type === "doc" && x.value.collection === selectedCollection);
+
+      for (const { id, value } of rows){
+        const el = document.createElement("div");
+        el.className = "itemRow";
+        el.style.cursor = "pointer";
+        const selected = (selectedDocId === id);
+        el.innerHTML = `
+          <div class="ico">${selected ? "🟣" : "📄"}</div>
+          <div class="meta">
+            <p class="title">${escapeHtml(value.title || "(untitled)")}</p>
+            <div class="sub">
+              <span class="tag mono">${escapeHtml(id.slice(0,10))}…</span>
+              <span class="tag">updated ${escapeHtml((value.updatedAt||"").slice(0,19).replace("T"," ") || "—")}</span>
+            </div>
+          </div>
+        `;
+        el.addEventListener("click", async () => {
+          selectedDocId = id;
+          $("#docId").value = id;
+          $("#docTitle").value = value.title || "";
+          $("#docJson").value = JSON.stringify(value.data ?? {}, null, 2);
+          $("#docMeta").textContent = JSON.stringify({ id, collection: value.collection, createdAt: value.createdAt, updatedAt: value.updatedAt }, null, 2);
+          await refreshDocsUI();
+        });
+        docList.appendChild(el);
+      }
+
+      // If selected doc no longer exists
+      if (selectedDocId && !rows.some(r => r.id === selectedDocId)) {
+        selectedDocId = null;
+        $("#docId").value = "";
+        $("#docTitle").value = "";
+        $("#docJson").value = "{}";
+        $("#docMeta").textContent = "Select a doc…";
+      }
+    }
+
+    // ---------------------------
+    // RTC view
+    // ---------------------------
+    function appendRtcLog(line){
+      const el = $("#rtcLog");
+      if (!el) return;
+      const prev = el.textContent || "";
+      el.textContent = (prev ? prev + "\n" : "") + line;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    async function renderRtc(){
+      mountTemplate("tpl-rtc");
+
+      const cfg = readConfig();
+      if (!cfg.rtcEnabled || !room || !rtcChannel) {
+        $("#chanState").textContent = "RTC disabled";
+        $("#peersDot").classList.remove("ok");
+        $("#peersDot").classList.add("warn");
+        $("#peersCount").textContent = "0";
+        $("#peersList").innerHTML = `<div class="tiny muted">RTC is disabled. Enable it in Settings → Tenant + Networking.</div>`;
+        $("#btnSendRtc").disabled = true;
+        $("#btnPingAll").disabled = true;
+        $("#btnLeaveRoom").disabled = true;
+        $("#btnAnnouncePresence").disabled = true;
+        return;
+      }
+
+      $("#peersDot").classList.add("ok");
+      await renderPeersIfOpen();
+
+      $("#btnSendRtc").addEventListener("click", () => {
+        const msg = ($("#rtcMsg").value || "").trim();
+        if (!msg) return;
+        rtcChannel.send({ type:"chat", text: msg, ts: nowIso() });
+        appendRtcLog(`[${new Date().toLocaleTimeString()}] you: ${msg}`);
+        $("#rtcMsg").value = "";
+        auditPush("rtc.channel.send", { msg });
+      });
+
+      $("#rtcMsg").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") $("#btnSendRtc").click();
+      });
+
+      $("#btnClearRtcLog").addEventListener("click", () => {
+        $("#rtcLog").textContent = "";
+      });
+
+      $("#btnPingAll").addEventListener("click", async () => {
+        const peers = Array.from(room.getPeers()?.keys?.() || []);
+        if (!peers.length) return toast("warn","No peers","No connected peers to ping.");
+        for (const pid of peers) {
+          try{
+            const ms = await room.ping(pid);
+            appendRtcLog(`[ping] ${pid}: ${ms}ms`);
+          }catch(e){
+            appendRtcLog(`[ping] ${pid}: failed`);
+          }
+        }
+        toast("ok","Ping","Finished pinging peers.");
+      });
+
+      $("#btnLeaveRoom").addEventListener("click", () => {
+        room.leave();
+        auditPush("rtc.leave", {});
+        toast("ok","Left room","Disconnected from peers.");
+        setTimeout(() => renderRtc(), 200);
+      });
+
+      $("#btnAnnouncePresence").addEventListener("click", () => {
+        rtcChannel.send({ type:"presence", who: getSession()?.user || "superadmin", ts: nowIso() });
+        appendRtcLog(`[${new Date().toLocaleTimeString()}] you: presence announced`);
+      });
+    }
+
+    async function renderPeersIfOpen(){
+      if (currentView() !== "rtc") return;
+      const list = $("#peersList");
+      const peersMap = room?.getPeers?.();
+      const ids = peersMap ? Array.from(peersMap.keys()) : [];
+      $("#peersCount").textContent = String(ids.length);
+
+      list.innerHTML = "";
+      if (!ids.length){
+        list.innerHTML = `<div class="tiny muted">No peers connected yet. Open this same tenant in another browser/device with RTC enabled.</div>`;
+        return;
+      }
+      for (const pid of ids){
+        const el = document.createElement("div");
+        el.className = "itemRow";
+        el.innerHTML = `
+          <div class="ico">🧑‍🤝‍🧑</div>
+          <div class="meta">
+            <p class="title mono">${escapeHtml(pid)}</p>
+            <div class="sub">
+              <span class="tag">connected</span>
+              <span class="tag mono">RTCPeerConnection</span>
+            </div>
+          </div>
+        `;
+        list.appendChild(el);
+      }
+    }
+
+    // ---------------------------
+    // API Keys
+    // ---------------------------
+    async function renderKeys(){
+      mountTemplate("tpl-keys");
+
+      $("#btnGenerateKey").addEventListener("click", async () => {
+        const label = ($("#keyLabel").value || "").trim() || "unnamed";
+        const perms = ($("#keyPerms").value || "read").split(",").map(s => s.trim()).filter(Boolean);
+
+        const rawKey = randomKey();
+        const keyHash = await sha256Hex(rawKey);
+
+        const value = {
+          type: "apikey",
+          label,
+          perms,
+          keyHash,
+          revoked: false,
+          createdAt: nowIso(),
+          lastUsedAt: null
+        };
+        const id = await db.put(value);
+        auditPush("apikey.create", { id, label, perms });
+
+        $("#lastKey").textContent = rawKey;
+        await navigator.clipboard.writeText(rawKey);
+        toast("ok","API Key Created","Copied to clipboard. This is the only time the raw key is shown.");
+        $("#keyLabel").value = "";
+        await refreshKeysUI();
+      });
+
+      $("#btnRefreshKeys").addEventListener("click", refreshKeysUI);
+
+      await refreshKeysUI();
+    }
+
+    async function refreshKeysUI(){
+      const { results } = await db.map({ query: { type: "apikey" }, field: "createdAt", order: "desc" });
+      const rows = (results || []).map(r => ({ id: r.id || r.key || r._id || "", value: r.value || r }))
+        .filter(x => x.value?.type === "apikey");
+
+      const active = rows.filter(x => x.value.revoked !== true);
+      $("#keysCount").textContent = String(active.length);
+
+      const list = $("#keysList");
+      list.innerHTML = "";
+      for (const { id, value } of rows){
+        const revoked = value.revoked === true;
+        const el = document.createElement("div");
+        el.className = "itemRow";
+        el.innerHTML = `
+          <div class="ico">${revoked ? "⛔" : "🔑"}</div>
+          <div class="meta">
+            <p class="title">${escapeHtml(value.label || "key")}</p>
+            <div class="sub">
+              <span class="tag">${escapeHtml(revoked ? "revoked" : "active")}</span>
+              <span class="tag">${escapeHtml((value.perms || []).join(","))}</span>
+              <span class="tag mono">${escapeHtml((value.keyHash || "").slice(0,14))}…</span>
+              <span class="tag">created ${escapeHtml((value.createdAt || "").slice(0,10) || "—")}</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center">
+            <button class="btn small ${revoked ? "" : "danger"}" data-act="toggle">${revoked ? "Restore" : "Revoke"}</button>
+          </div>
+        `;
+        el.querySelector("[data-act='toggle']").addEventListener("click", async () => {
+          const next = { ...value, revoked: !revoked, updatedAt: nowIso() };
+          await db.put(next, id);
+          auditPush("apikey.toggle", { id, revoked: next.revoked });
+          toast("ok", revoked ? "Restored" : "Revoked", `Key "${value.label}" updated.`);
+          await refreshKeysUI();
+        });
+        list.appendChild(el);
+      }
+
+      if (!rows.length){
+        list.innerHTML = `<div class="tiny muted">No keys yet. Generate one on the left.</div>`;
+      }
+    }
+
+    // ---------------------------
+    // API Emulator
+    // ---------------------------
+    async function renderApi(){
+      mountTemplate("tpl-api");
+
+      $("#btnRunApi").addEventListener("click", async () => {
+        const rawKey = ($("#apiKeyInput").value || "").trim();
+        const action = $("#apiAction").value;
+        const collection = ($("#apiCollection").value || "").trim();
+        const docId = ($("#apiDocId").value || "").trim();
+        const payloadText = $("#apiPayload").value || "{}";
+
+        const resEl = $("#apiResponse");
+        resEl.textContent = "Running…";
+
+        try{
+          const out = await genusApiRequest({
+            apiKey: rawKey,
+            action,
+            collection,
+            docId,
+            payloadText
+          });
+          resEl.textContent = JSON.stringify(out, null, 2);
+        }catch(e){
+          resEl.textContent = JSON.stringify({ ok:false, error: e?.message || String(e) }, null, 2);
+        }
+      });
+
+      $("#btnCopyCurl").addEventListener("click", async () => {
+        const sample = [
+`# Replace YOUR_API_KEY and HOST. These are example shapes for a real gateway.`,
+`curl -H "Authorization: Bearer YOUR_API_KEY" https://HOST/v1/collections`,
+`curl -H "Authorization: Bearer YOUR_API_KEY" "https://HOST/v1/docs?collection=products"`,
+`curl -H "Authorization: Bearer YOUR_API_KEY" https://HOST/v1/docs/DOC_ID`,
+`curl -X PUT -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json" \\`,
+`  -d '{"collection":"products","title":"New","data":{"price":10}}' https://HOST/v1/docs`,
+`curl -X DELETE -H "Authorization: Bearer YOUR_API_KEY" https://HOST/v1/docs/DOC_ID`
+        ].join("\n");
+        await navigator.clipboard.writeText(sample);
+        toast("ok","Copied","curl examples copied.");
+      });
+
+      $("#apiResponse").textContent = JSON.stringify({ ok:true, hint:"Paste an API key created in API Keys, then run an action." }, null, 2);
+    }
+
+    async function genusApiRequest({ apiKey, action, collection, docId, payloadText }){
+      // Validate key
+      const keyHash = await sha256Hex(apiKey || "");
+      const keyNode = await findApiKeyByHash(keyHash);
+      if (!keyNode) return { ok:false, status: 401, error: "Invalid API key" };
+      if (keyNode.value.revoked) return { ok:false, status: 403, error: "API key revoked" };
+
+      // Track last used
+      try{
+        await db.put({ ...keyNode.value, lastUsedAt: nowIso() }, keyNode.id);
+      }catch{}
+
+      const perms = new Set((keyNode.value.perms || []).map(s => s.toLowerCase()));
+      const isAdmin = perms.has("admin");
+      const canRead = isAdmin || perms.has("read");
+      const canWrite = isAdmin || perms.has("write");
+      const canDelete = isAdmin || perms.has("delete");
+
+      const require = (cond, msg) => { if (!cond) throw new Error(msg); };
+
+      // Actions
+      if (action === "listCollections"){
+        require(canRead, "Permission denied (read)");
+        const { results } = await db.map({ query: { type: "collection" }, field:"name", order:"asc" });
+        const out = (results||[]).map(r => ({ id: r.id || r.key || r._id || "", name: (r.value||r).name }));
+        return { ok:true, status:200, data: out };
+      }
+
+      if (action === "listDocs"){
+        require(canRead, "Permission denied (read)");
+        require(!!collection, "Missing collection");
+        const { results } = await db.map({ query: { type:"doc", collection }, field:"updatedAt", order:"desc" });
+        const out = (results||[]).map(r => ({ id: r.id || r.key || r._id || "", title: (r.value||r).title, updatedAt: (r.value||r).updatedAt }));
+        return { ok:true, status:200, data: out };
+      }
+
+      if (action === "getDoc"){
+        require(canRead, "Permission denied (read)");
+        require(!!docId, "Missing docId");
+        const { result } = await db.get(docId);
+        if (!result) return { ok:false, status:404, error:"Not found" };
+        return { ok:true, status:200, data: result };
+      }
+
+      if (action === "putDoc"){
+        require(canWrite, "Permission denied (write)");
+        const parsed = safeJsonParse(payloadText);
+        if (!parsed.ok) return { ok:false, status:400, error:"Invalid JSON payload", details: parsed.error };
+        const title = String(parsed.value.title || "Untitled");
+        const data = parsed.value.data ?? parsed.value;
+        const col = String(parsed.value.collection || collection || "").trim();
+        if (!col) return { ok:false, status:400, error:"Missing collection" };
+
+        // Ensure collection exists (optional convenience)
+        await ensureCollection(col);
+
+        const value = { type:"doc", collection: col, title, data, updatedAt: nowIso(), createdAt: nowIso() };
+        const id = await db.put(value);
+        auditPush("api.putDoc", { by: keyNode.value.label, id, collection: col });
+        return { ok:true, status:200, data: { id } };
+      }
+
+      if (action === "deleteDoc"){
+        require(canDelete, "Permission denied (delete)");
+        require(!!docId, "Missing docId");
+        await db.remove(docId);
+        auditPush("api.deleteDoc", { by: keyNode.value.label, id: docId });
+        return { ok:true, status:200, data: { deleted: true } };
+      }
+
+      return { ok:false, status:400, error:"Unknown action" };
+    }
+
+    async function ensureCollection(name){
+      // Quick existence check
+      const { results } = await db.map({ query: { type:"collection", name } });
+      if (results?.length) return;
+      await createCollection(name);
+    }
+
+    async function findApiKeyByHash(keyHash){
+      // Query by type then filter, since the query language may not index arbitrary fields for equality the same way across builds.
+      const { results } = await db.map({ query: { type:"apikey" } });
+      const rows = (results || []).map(r => ({ id: r.id || r.key || r._id || "", value: r.value || r }))
+        .filter(x => x.value?.type === "apikey");
+      return rows.find(x => x.value.keyHash === keyHash) || null;
+    }
+
+    // ---------------------------
+    // Settings
+    // ---------------------------
+    async function renderSettings(){
+      mountTemplate("tpl-settings");
+
+      const c = readCreds();
+      $("#saUser").value = c?.username || "";
+      $("#saPass").value = "";
+
+      const cfg = readConfig();
+      $("#setDbName").value = cfg.tenantDbName;
+      $("#setRtc").value = cfg.rtcEnabled ? "true" : "false";
+      $("#setRtcPassword").value = cfg.rtcPassword || "";
+      $("#setRelays").value = (cfg.relayUrls || []).join(", ");
+
+      $("#btnSaveCreds").addEventListener("click", async () => {
+        const u = ($("#saUser").value || "").trim();
+        const p = ($("#saPass").value || "").trim();
+        if (!u) return toast("warn","Missing","Username required.");
+        if (!p) return toast("warn","Missing","Password required.");
+
+        writeCreds({ username: u, passwordHash: await sha256Hex(p) });
+        auditPush("superadmin.creds.update", { username: u });
+        $("#saPass").value = "";
+        toast("ok","Saved","Superadmin credentials updated.");
+      });
+
+      $("#btnResetCreds").addEventListener("click", async () => {
+        await resetToDemoCreds();
+        const c2 = readCreds();
+        $("#saUser").value = c2.username;
+        $("#saPass").value = "";
+      });
+
+      $("#btnReconnect").addEventListener("click", async () => {
+        const next = {
+          tenantDbName: ($("#setDbName").value || "").trim() || "genusdb-demo",
+          rtcEnabled: $("#setRtc").value === "true",
+          rtcPassword: ($("#setRtcPassword").value || "").trim(),
+          relayUrls: ($("#setRelays").value || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean)
+        };
+        writeConfig(next);
+        $("#tenantPill").textContent = next.tenantDbName;
+        await connectDb();
+        toast("ok","Reconnected","Tenant settings applied.");
+      });
+
+      $("#btnFactoryReset").addEventListener("click", async () => {
+        const ok = confirm("Factory reset local config + creds? (Does not wipe DB nodes unless you do it from Dashboard)");
+        if (!ok) return;
+        localStorage.removeItem(LS.CFG);
+        localStorage.removeItem(LS.SA);
+        localStorage.removeItem(LS.SES);
+        localStorage.removeItem(LS.AUD);
+        await ensureDefaults();
+        toast("ok","Reset","Local settings reset. Reloading…");
+        await sleep(500);
+        location.reload();
+      });
+    }
+
+    // ---------------------------
+    // Audit
+    // ---------------------------
+    function renderAudit(){
+      mountTemplate("tpl-audit");
+      renderAuditIfOpen();
+
+      $("#btnClearAudit").addEventListener("click", () => {
+        localStorage.setItem(LS.AUD, JSON.stringify([]));
+        renderAuditIfOpen();
+        toast("ok","Cleared","Audit log cleared.");
+      });
+    }
+
+    function renderAuditIfOpen(){
+      if (currentView() !== "audit") return;
+      const arr = JSON.parse(localStorage.getItem(LS.AUD) || "[]");
+      $("#auditCount").textContent = String(arr.length);
+      const list = $("#auditList");
+      list.innerHTML = "";
+      for (const it of arr){
+        const el = document.createElement("div");
+        el.className = "itemRow";
+        el.innerHTML = `
+          <div class="ico">🧾</div>
+          <div class="meta">
+            <p class="title">${escapeHtml(it.action)}</p>
+            <div class="sub">
+              <span class="tag">${escapeHtml((it.ts||"").slice(0,19).replace("T"," "))}</span>
+              <span class="tag mono">${escapeHtml(JSON.stringify(it.details || {}).slice(0, 120))}${JSON.stringify(it.details||{}).length>120?"…":""}</span>
+            </div>
+          </div>
+        `;
+        list.appendChild(el);
+      }
+      if (!arr.length){
+        list.innerHTML = `<div class="tiny muted">No audit entries yet.</div>`;
+      }
+    }
+
+    // ---------------------------
+    // Render router
+    // ---------------------------
+    async function renderView(name){
+      if (!db) return;
+      if (name === "dashboard") return renderDashboard();
+      if (name === "data") return renderDataExplorer();
+      if (name === "rtc") return renderRtc();
+      if (name === "keys") return renderKeys();
+      if (name === "api") return renderApi();
+      if (name === "settings") return renderSettings();
+      if (name === "audit") return renderAudit();
+    }
+
+    // ---------------------------
+    // Topbar + global UI state
+    // ---------------------------
+    function setUiSignedOut(){
+      $("#uiStatusText").textContent = "Signed out";
+      $("#uiStatusDot").className = "dot warn";
+      $("#uiSub").textContent = "GenosDB + GenosRTC · Superadmin Console · SaaS/API-ready skeleton";
+      $("#btnLogout").style.display = "none";
+      $("#btnExport").style.display = "none";
+    }
+    function setUiSignedIn(){
+      const cfg = readConfig();
+      $("#uiStatusText").textContent = "Connected";
+      $("#uiStatusDot").className = "dot ok";
+      $("#uiSub").textContent = `Tenant: ${cfg.tenantDbName} · RTC: ${cfg.rtcEnabled ? "enabled" : "disabled"}`;
+      $("#btnLogout").style.display = "";
+      $("#btnExport").style.display = "";
+      $("#tenantPill").textContent = cfg.tenantDbName;
+    }
+
+    async function exportBundle(){
+      const cfg = readConfig();
+      const creds = readCreds();
+      const audit = JSON.parse(localStorage.getItem(LS.AUD) || "[]");
+      const { results: keys } = await db.map({ query: { type: "apikey" } });
+      const keySummaries = (keys||[]).map(r => {
+        const v = r.value || r;
+        return { id: r.id || r.key || r._id || "", label: v.label, perms: v.perms, keyHash: v.keyHash, revoked: v.revoked, createdAt: v.createdAt, lastUsedAt: v.lastUsedAt };
+      });
+
+      const bundle = { exportedAt: nowIso(), cfg, superadmin: { username: creds?.username }, apiKeys: keySummaries, audit };
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `genusdb-export-${cfg.tenantDbName}-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast("ok","Exported","Downloaded config + key summaries.");
+    }
+
+    // ---------------------------
+    // Boot
+    // ---------------------------
+    await ensureDefaults();
+
+    // populate login defaults
+    const cfg = readConfig();
+    const creds = readCreds();
+    $("#loginUser").value = creds?.username || "demo";
+    $("#loginPass").value = "";
+    $("#loginDbName").value = cfg.tenantDbName;
+    $("#loginRtc").value = cfg.rtcEnabled ? "true" : "false";
+    $("#loginRtcPassword").value = cfg.rtcPassword || "";
+    $("#loginRelays").value = (cfg.relayUrls || []).join(", ");
+
+    // topbar buttons
+    $("#btnOpenDocs").addEventListener("click", () => {
+      // Official references are in the repo docs and mention enabling rtc and db.room usage.
+      window.open("https://github.com/estebanrfp/gdb/blob/main/docs/genosdb-api-reference.md", "_blank", "noopener,noreferrer");
+    });
+
+    $("#btnExport").addEventListener("click", async () => {
+      if (!db) return toast("warn","Not connected","Sign in first.");
+      await exportBundle();
+    });
+
+    $("#btnLogout").addEventListener("click", () => {
+      clearSession();
+      location.reload();
+    });
+
+    // Login actions
+    $("#btnResetDemo").addEventListener("click", async () => {
+      await resetToDemoCreds();
+      $("#loginUser").value = "demo";
+      $("#loginPass").value = "demo";
+    });
+
+    $("#btnLogin").addEventListener("click", async () => {
+      const u = ($("#loginUser").value || "").trim();
+      const p = ($("#loginPass").value || "").trim();
+      const tenantDbName = ($("#loginDbName").value || "").trim() || "genusdb-demo";
+      const rtcEnabled = $("#loginRtc").value === "true";
+      const rtcPassword = ($("#loginRtcPassword").value || "").trim();
+      const relayUrls = ($("#loginRelays").value || "")
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      if (!u || !p) return toast("warn","Missing","Enter username + password.");
+
+      const ok = await login(u,p);
+      if (!ok) return toast("bad","Denied","Invalid superadmin credentials.");
+
+      writeConfig({ tenantDbName, rtcEnabled, rtcPassword, relayUrls });
+      auditPush("superadmin.login", { user: u, tenantDbName });
+
+      // swap views
+      $("#loginView").classList.add("hidden");
+      $("#appView").classList.remove("hidden");
+
+      // nav wiring
+      $$("#nav .item").forEach(el => el.addEventListener("click", () => setActiveView(el.dataset.view)));
+
+      await connectDb();
+      setActiveView("dashboard");
+    });
+
+    // Keep logged-in session
+    const sess = getSession();
+    if (sess?.user) {
+      // auto-enter console (no password re-check for demo)
+      $("#loginView").classList.add("hidden");
+      $("#appView").classList.remove("hidden");
+      $$("#nav .item").forEach(el => el.addEventListener("click", () => setActiveView(el.dataset.view)));
+      await connectDb();
+      setActiveView("dashboard");
+    } else {
+      setUiSignedOut();
+      $("#btnLogout").style.display = "none";
+      $("#btnExport").style.display = "none";
+    }
+
+    // ---------------------------
+    // Small helpers for Dashboard UI refresh
+    // ---------------------------
+    async function renderPeersIfOpenWrapper(){ await renderPeersIfOpen(); }
+
+    // Provide a few globals for integration/testing
+    window.Genus = {
+      get db(){ return db; },
+      get room(){ return room; },
+      // API emulator entry point
+      genusApiRequest,
+      // quick put doc
+      putDoc: async (collection, title, data) => {
+        await ensureCollection(collection);
+        return db.put({ type:"doc", collection, title, data, updatedAt: nowIso(), createdAt: nowIso() });
+      }
+    };
+
+    // ---------------------------
+    // Keep UI status pill in sync
+    // ---------------------------
+    function updateStatusPill(){
+      const s = getSession();
+      if (!s?.user) return setUiSignedOut();
+      setUiSignedIn();
+    }
+    updateStatusPill();
+
+  </script>
+</body>
+</html>
