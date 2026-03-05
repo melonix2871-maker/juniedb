@@ -20,7 +20,6 @@
             justify-content: center;
         }
 
-        /* Auth Container */
         .auth-container {
             width: 100%;
             max-width: 400px;
@@ -127,15 +126,6 @@
             background: #5a6268;
         }
 
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #bb2d3b;
-        }
-
         .alert {
             padding: 12px;
             border-radius: 6px;
@@ -164,7 +154,6 @@
             display: none;
         }
 
-        /* Dashboard */
         .dashboard-container {
             display: none;
             width: 100%;
@@ -250,7 +239,6 @@
             background: #bb2d3b;
         }
 
-        /* Stats Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -277,7 +265,6 @@
             color: #1a73e8;
         }
 
-        /* Tabs */
         .dashboard-tabs {
             display: flex;
             gap: 10px;
@@ -285,7 +272,6 @@
             background: white;
             padding: 10px;
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .tab-btn {
@@ -309,7 +295,6 @@
             color: white;
         }
 
-        /* CRUD Interface */
         .crud-interface {
             background: white;
             border-radius: 10px;
@@ -466,7 +451,6 @@
             border-color: #1a73e8;
         }
 
-        /* Settings Panel */
         .settings-panel {
             background: white;
             border-radius: 10px;
@@ -505,7 +489,6 @@
             margin-top: 20px;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -557,7 +540,6 @@
             justify-content: flex-end;
         }
 
-        /* Checkbox style */
         .checkbox-group {
             display: flex;
             align-items: center;
@@ -570,7 +552,6 @@
             margin-right: 5px;
         }
 
-        /* Loading Spinner */
         .spinner {
             display: inline-block;
             width: 20px;
@@ -626,7 +607,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Toast Notifications */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -657,20 +637,17 @@
 
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(0%); opacity: 1; }
         }
 
         @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
+            from { transform: translateX(0%); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
         }
     </style>
 </head>
 <body>
-    <!-- Toast Container -->
     <div id="toastContainer" class="toast-container"></div>
-
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-spinner-large"></div>
         <div style="color: #667eea; font-weight: 500;">Loading...</div>
@@ -683,33 +660,21 @@
                 <h1>🔐 GenosDB Admin</h1>
                 <p>Secure Peer-to-Peer Database Management</p>
             </div>
-
-            <!-- CSRF Token -->
             <input type="hidden" id="csrfToken" value="">
-
-            <!-- Alert Message -->
             <div id="authAlert" class="alert"></div>
-
-            <!-- Login Form -->
             <div class="auth-form">
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" id="loginEmail" placeholder="admin@example.com" 
-                               value="admin@example.com" oninput="validateLoginForm()">
+                        <input type="email" id="loginEmail" placeholder="admin@example.com" value="admin@example.com" oninput="validateLoginForm()">
                         <div id="loginEmailError" class="error-message"></div>
                     </div>
-
                     <div class="form-group">
                         <label>Password</label>
-                        <input type="password" id="loginPassword" placeholder="••••••••" 
-                               value="Admin123!" oninput="validateLoginForm()">
+                        <input type="password" id="loginPassword" placeholder="••••••••" value="Admin123!" oninput="validateLoginForm()">
                         <div id="loginPasswordError" class="error-message"></div>
                     </div>
-
-                    <button type="submit" id="loginBtn" class="btn btn-primary">
-                        Login to Dashboard
-                    </button>
+                    <button type="submit" id="loginBtn" class="btn btn-primary">Login to Dashboard</button>
                 </form>
             </div>
         </div>
@@ -731,27 +696,13 @@
             </div>
         </div>
 
-        <!-- Stats Cards -->
         <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Records</h3>
-                <div class="number" id="totalRecords">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Collections</h3>
-                <div class="number" id="totalCollections">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Users</h3>
-                <div class="number" id="totalUsers">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Posts</h3>
-                <div class="number" id="totalPosts">0</div>
-            </div>
+            <div class="stat-card"><h3>Total Records</h3><div class="number" id="totalRecords">0</div></div>
+            <div class="stat-card"><h3>Collections</h3><div class="number" id="totalCollections">0</div></div>
+            <div class="stat-card"><h3>Users</h3><div class="number" id="totalUsers">0</div></div>
+            <div class="stat-card"><h3>Posts</h3><div class="number" id="totalPosts">0</div></div>
         </div>
 
-        <!-- Tabs -->
         <div class="dashboard-tabs">
             <button class="tab-btn active" onclick="switchTab('data')">📋 Data Manager</button>
             <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
@@ -760,88 +711,55 @@
         <!-- Data Manager Tab -->
         <div id="dataTab" class="crud-interface active">
             <div class="toolbar">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search by meta key or value..." 
-                           oninput="debounce(applyFilters, 300)()">
-                </div>
+                <div class="search-box"><input type="text" id="searchInput" placeholder="Search..." oninput="debounce(applyFilters, 300)()"></div>
                 <div class="filter-group">
-                    <input type="text" id="collectionFilter" class="collection-filter-input" 
-                           placeholder="Filter by collection..." list="collectionSuggestions"
-                           oninput="debounce(applyFilters, 300)()">
+                    <input type="text" id="collectionFilter" placeholder="Filter by collection..." list="collectionSuggestions" oninput="debounce(applyFilters, 300)()">
                     <datalist id="collectionSuggestions"></datalist>
                     <select id="repeaterFilter" onchange="applyFilters()">
-                        <option value="">All (Any)</option>
-                        <option value="true">Repeater Only</option>
-                        <option value="false">Single Only</option>
+                        <option value="">All</option><option value="true">Repeater Only</option><option value="false">Single Only</option>
                     </select>
                     <button onclick="openCreateModal()" class="btn-primary small">➕ Create New</button>
                     <button onclick="loadData()" class="btn-secondary">🔄 Refresh</button>
                 </div>
             </div>
-
             <div class="table-container">
                 <table id="dataTable">
-                    <thead>
-                        <tr>
-                            <th onclick="sortBy('id')">ID ⬇️</th>
-                            <th onclick="sortBy('relid')">Relational ID</th>
-                            <th onclick="sortBy('repeater')">Repeater</th>
-                            <th onclick="sortBy('collection')">Collection</th>
-                            <th onclick="sortBy('metaKey')">Meta Key</th>
-                            <th onclick="sortBy('metaValue')">Meta Value</th>
-                            <th onclick="sortBy('dateCreated')">Date Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr>
-                            <td colspan="8" style="text-align: center; padding: 40px;">
-                                <div class="spinner" style="border-top-color: #667eea;"></div>
-                                Loading data...
-                            </td>
-                        </tr>
-                    </tbody>
+                    <thead><tr><th onclick="sortBy('id')">ID</th><th onclick="sortBy('relid')">Relational ID</th><th onclick="sortBy('repeater')">Repeater</th><th onclick="sortBy('collection')">Collection</th><th onclick="sortBy('metaKey')">Meta Key</th><th onclick="sortBy('metaValue')">Meta Value</th><th onclick="sortBy('dateCreated')">Date Created</th><th>Actions</th></tr></thead>
+                    <tbody id="tableBody"><tr><td colspan="8" style="text-align:center; padding:40px;">Loading...</td></tr></tbody>
                 </table>
             </div>
-
             <div class="pagination" id="pagination"></div>
         </div>
 
         <!-- Settings Tab -->
         <div id="settingsTab" class="settings-panel">
             <h2>⚙️ System Settings</h2>
-            
-            <!-- Admin Credentials Section -->
             <div class="settings-section">
                 <h3>🔐 Admin Credentials</h3>
                 <form id="credentialsForm" onsubmit="updateCredentials(event)">
                     <input type="hidden" id="settingsCsrfToken" value="">
-                    
                     <div class="form-group">
                         <label>Admin Email</label>
-                        <input type="email" id="adminEmail" value="admin@example.com" required>
+                        <input type="email" id="adminEmail" required>
                         <div id="adminEmailError" class="error-message"></div>
                     </div>
-                    
                     <div class="form-group">
                         <label>New Password (leave blank to keep current)</label>
                         <input type="password" id="adminPassword" placeholder="Enter new password">
                         <div id="adminPasswordError" class="error-message"></div>
                     </div>
-                    
                     <div class="form-group">
                         <label>Confirm New Password</label>
                         <input type="password" id="adminConfirmPassword" placeholder="Confirm new password">
                         <div id="adminConfirmError" class="error-message"></div>
                     </div>
-                    
                     <div class="settings-actions">
                         <button type="button" onclick="loadSettings()" class="btn-secondary">Reset</button>
                         <button type="submit" class="btn-primary">Update Credentials</button>
                     </div>
                 </form>
-                <div style="margin-top: 15px; padding: 10px; background: #e8f0fe; border-radius: 6px; font-size: 13px;">
-                    <strong>Current Login:</strong> Use your updated credentials immediately after saving.
+                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 6px; font-size: 13px; color: #856404;">
+                    <strong>⚠️ Important:</strong> After changing credentials, all existing sessions will be invalidated. You'll need to login again with your new credentials.
                 </div>
             </div>
         </div>
@@ -850,55 +768,19 @@
     <!-- Create/Edit Modal -->
     <div id="modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Create Record</h2>
-                <button onclick="closeModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
-            </div>
+            <div class="modal-header"><h2 id="modalTitle">Create Record</h2><button onclick="closeModal()" style="background:none; border:none; font-size:20px;">&times;</button></div>
             <div class="modal-body">
                 <form id="recordForm" onsubmit="saveRecord(event)">
-                    <input type="hidden" id="csrfTokenModal" value="">
-                    <input type="hidden" id="recordId">
-                    
-                    <div class="form-group">
-                        <label>Relational ID</label>
-                        <input type="number" id="relid" value="0">
-                        <div id="relidError" class="error-message"></div>
-                    </div>
-                    
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="repeater">
-                        <label for="repeater">Repeater (Allow multiple values)</label>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Collection</label>
-                        <input type="text" id="collection" placeholder="Enter collection name" list="collectionModalSuggestions" autocomplete="off" required>
-                        <datalist id="collectionModalSuggestions"></datalist>
-                        <div id="collectionError" class="error-message"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Meta Key</label>
-                        <input type="text" id="metaKey" placeholder="e.g., firstname, email, title" required>
-                        <div id="metaKeyError" class="error-message"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Meta Value</label>
-                        <input type="text" id="metaValue" placeholder="Enter value" required>
-                        <div id="metaValueError" class="error-message"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Date Created</label>
-                        <input type="datetime-local" id="dateCreated">
-                    </div>
+                    <input type="hidden" id="csrfTokenModal" value=""><input type="hidden" id="recordId">
+                    <div class="form-group"><label>Relational ID</label><input type="number" id="relid" value="0"></div>
+                    <div class="checkbox-group"><input type="checkbox" id="repeater"><label>Repeater (Allow multiple values)</label></div>
+                    <div class="form-group"><label>Collection</label><input type="text" id="collection" placeholder="Collection name" list="collectionModalSuggestions" required><datalist id="collectionModalSuggestions"></datalist><div id="collectionError" class="error-message"></div></div>
+                    <div class="form-group"><label>Meta Key</label><input type="text" id="metaKey" placeholder="e.g., firstname" required><div id="metaKeyError" class="error-message"></div></div>
+                    <div class="form-group"><label>Meta Value</label><input type="text" id="metaValue" placeholder="Enter value" required><div id="metaValueError" class="error-message"></div></div>
+                    <div class="form-group"><label>Date Created</label><input type="datetime-local" id="dateCreated"></div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button onclick="closeModal()" class="btn-secondary">Cancel</button>
-                <button onclick="saveRecord(event)" class="btn-primary">Save Record</button>
-            </div>
+            <div class="modal-footer"><button onclick="closeModal()" class="btn-secondary">Cancel</button><button onclick="saveRecord(event)" class="btn-primary">Save Record</button></div>
         </div>
     </div>
 
@@ -906,29 +788,22 @@
         import { gdb } from "https://cdn.jsdelivr.net/npm/genosdb@latest/dist/index.min.js";
 
         // =============================================
-        // 1. SIMPLE PASSWORD HASHING (NO SALT ISSUES)
+        // SIMPLE PASSWORD ENCODING
         // =============================================
-        
-        // Simple base64 encoding instead of complex hashing
-        // This ensures consistency between login and settings
         function encodePassword(password) {
-            return btoa(password); // Simple base64 encoding
-        }
-
-        function decodePassword(encoded) {
-            return atob(encoded);
+            return btoa(password); // Simple base64 for reliability
         }
 
         // =============================================
-        // 2. SECURITY MANAGER
+        // SECURITY MANAGER - FIXED VERSION
         // =============================================
-
         class SecurityManager {
             constructor() {
                 this.csrfToken = this.generateCSRFToken();
                 this.db = null;
                 this.SESSION_KEY = 'genosdb_session';
                 this.SETTINGS_KEY = 'system:admin_settings';
+                this.initialized = false;
             }
 
             generateCSRFToken() {
@@ -942,33 +817,21 @@
             }
 
             validateEmail(email) {
-                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return re.test(email);
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             }
 
             sanitizeInput(input) {
                 if (typeof input !== 'string') return input;
                 return input.replace(/[&<>"']/g, function(m) {
-                    if (m === '&') return '&amp;';
-                    if (m === '<') return '&lt;';
-                    if (m === '>') return '&gt;';
-                    if (m === '"') return '&quot;';
-                    if (m === "'") return '&#39;';
-                    return m;
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
                 });
             }
 
             async initDB(room = 'genosdb-secure') {
-                this.db = await gdb(room, {
-                    rtc: true,
-                    sm: {
-                        acls: true
-                    }
-                });
+                this.db = await gdb(room, { rtc: true, sm: { acls: true } });
                 return this.db;
             }
 
-            // Session management
             saveSession(user) {
                 const session = {
                     user: user,
@@ -979,16 +842,19 @@
             }
 
             loadSession() {
-                const session = localStorage.getItem(this.SESSION_KEY);
-                if (session) {
-                    const parsed = JSON.parse(session);
-                    if (parsed.expires > Date.now()) {
-                        this.csrfToken = parsed.token;
-                        return parsed.user;
-                    } else {
-                        this.clearSession();
+                try {
+                    const session = localStorage.getItem(this.SESSION_KEY);
+                    if (session) {
+                        const parsed = JSON.parse(session);
+                        if (parsed.expires > Date.now()) {
+                            this.csrfToken = parsed.token;
+                            return parsed.user;
+                        }
                     }
+                } catch (e) {
+                    console.log('Error loading session:', e);
                 }
+                this.clearSession();
                 return null;
             }
 
@@ -996,23 +862,48 @@
                 localStorage.removeItem(this.SESSION_KEY);
             }
 
-            // Settings management - FIXED VERSION
+            // Clear ALL sessions when credentials change
+            async clearAllSessions() {
+                try {
+                    // Remove all session records from DB
+                    await this.db.map({ query: { collection: 'system', metaKey: 'session' } }, async (id, record) => {
+                        await this.db.remove(id).catch(() => {});
+                    });
+                } catch (e) {
+                    console.log('Error clearing sessions:', e);
+                }
+                // Clear local session
+                this.clearSession();
+            }
+
             async saveSettings(email, password) {
+                // Generate new password hash
+                const passwordHash = password ? encodePassword(password) : null;
+                
+                // Get existing settings to know if we need to keep old password
+                let existingSettings = null;
+                try {
+                    const existing = await this.db.get(this.SETTINGS_KEY);
+                    if (existing) {
+                        existingSettings = JSON.parse(existing.metaValue);
+                    }
+                } catch (e) {
+                    console.log('No existing settings');
+                }
+
+                // Create new settings object
                 const settings = {
                     email: email,
-                    password: password ? encodePassword(password) : null
+                    password: passwordHash || (existingSettings ? existingSettings.password : encodePassword('Admin123!'))
                 };
-                
-                // Check if settings exist
-                const existing = await this.db.get(this.SETTINGS_KEY);
-                
+
+                // Save to database
+                const existing = await this.db.get(this.SETTINGS_KEY).catch(() => null);
                 if (existing) {
-                    // Update existing
                     existing.metaValue = JSON.stringify(settings);
                     existing.dateCreated = new Date().toISOString();
                     await this.db.put(existing, this.SETTINGS_KEY);
                 } else {
-                    // Create new
                     await this.db.put({
                         id: 999999,
                         relid: 0,
@@ -1023,6 +914,13 @@
                         dateCreated: new Date().toISOString()
                     }, this.SETTINGS_KEY);
                 }
+
+                // If password was changed, clear all sessions
+                if (password) {
+                    await this.clearAllSessions();
+                }
+
+                return settings;
             }
 
             async loadSettings() {
@@ -1045,18 +943,25 @@
             async verifyCredentials(email, password) {
                 const settings = await this.loadSettings();
                 const encodedPassword = encodePassword(password);
-                
-                console.log('Verifying:', { email, provided: email, stored: settings.email });
-                console.log('Password match:', encodedPassword === settings.password);
-                
                 return email === settings.email && encodedPassword === settings.password;
+            }
+
+            async initializeDefaultSettings() {
+                try {
+                    const settings = await this.loadSettings();
+                    if (!settings.password) {
+                        await this.saveSettings('admin@example.com', 'Admin123!');
+                    }
+                } catch (error) {
+                    console.log('Initializing default settings');
+                    await this.saveSettings('admin@example.com', 'Admin123!');
+                }
             }
         }
 
         // =============================================
-        // 3. AUTH MANAGER
+        // AUTH MANAGER
         // =============================================
-
         class AuthManager {
             constructor(security) {
                 this.security = security;
@@ -1064,50 +969,50 @@
             }
 
             async login(email, password) {
+                const isValid = await this.security.verifyCredentials(email, password);
+                if (!isValid) throw new Error('Invalid credentials');
+                
+                this.currentUser = {
+                    id: 1,
+                    name: 'Super Admin',
+                    email: email,
+                    isSuperAdmin: true
+                };
+                
+                // Create session in DB
                 try {
-                    const isValid = await this.security.verifyCredentials(email, password);
-                    
-                    if (isValid) {
-                        this.currentUser = {
-                            id: 1,
-                            name: 'Super Admin',
-                            email: email,
-                            isSuperAdmin: true
-                        };
-                        
-                        // Create session
-                        await this.security.db.put({
-                            id: Date.now(),
-                            relid: 1,
-                            repeater: true,
-                            collection: 'system',
-                            metaKey: 'session',
-                            metaValue: this.security.csrfToken,
-                            dateCreated: new Date().toISOString()
-                        }, `session:${Date.now()}`);
-                        
-                        this.security.saveSession(this.currentUser);
-                        
-                        return this.currentUser;
-                    }
-                    
-                    throw new Error('Invalid credentials');
-                } catch (error) {
-                    console.error('Login error:', error);
-                    throw error;
+                    await this.security.db.put({
+                        id: Date.now(),
+                        relid: 1,
+                        repeater: true,
+                        collection: 'system',
+                        metaKey: 'session',
+                        metaValue: this.security.csrfToken,
+                        dateCreated: new Date().toISOString()
+                    }, `session:${Date.now()}`);
+                } catch (e) {
+                    console.log('Session creation error (non-critical):', e);
                 }
+                
+                // Save to localStorage
+                this.security.saveSession(this.currentUser);
+                return this.currentUser;
             }
 
             async logout() {
-                if (this.currentUser) {
-                    await this.security.db.map({ 
-                        query: { 
-                            collection: 'system', 
-                            metaKey: 'session'
-                        } 
+                // Remove current session from DB
+                try {
+                    await this.security.db.map({
+                        query: {
+                            collection: 'system',
+                            metaKey: 'session',
+                            metaValue: this.security.csrfToken
+                        }
                     }, async (id, record) => {
-                        await this.security.db.remove(id);
+                        await this.security.db.remove(id).catch(() => {});
                     });
+                } catch (e) {
+                    console.log('Session removal error:', e);
                 }
 
                 this.currentUser = null;
@@ -1130,9 +1035,8 @@
         }
 
         // =============================================
-        // 4. DATABASE MANAGER
+        // DATABASE MANAGER - FIXED FOR RECORD CREATION
         // =============================================
-
         class DatabaseManager {
             constructor(security, auth) {
                 this.security = security;
@@ -1143,31 +1047,30 @@
                 this.pageSize = 20;
                 this.sortField = 'id';
                 this.sortDirection = 'desc';
-                this.filters = {
-                    search: '',
-                    collection: '',
-                    repeater: ''
-                };
+                this.filters = { search: '', collection: '', repeater: '' };
                 this.realtimeSubscription = null;
             }
 
             async initRealtime() {
+                if (this.realtimeSubscription) return;
+                
                 this.realtimeSubscription = await this.security.db.map({ realtime: true }, (id, value, action) => {
-                    if (value && value.id && value.collection) {
+                    // Only process non-system records with valid data
+                    if (value && typeof value === 'object' && value.id && value.collection && value.collection !== 'system') {
                         if (action === 'put') {
                             this.data.set(`record:${value.id}`, value);
-                            if (value.id >= this.nextId) {
-                                this.nextId = value.id + 1;
-                            }
+                            if (value.id >= this.nextId) this.nextId = value.id + 1;
                         } else if (action === 'remove') {
-                            for (let [key, val] of this.data) {
-                                if (val.id === parseInt(id.split(':')[1])) {
-                                    this.data.delete(key);
-                                    break;
+                            const recordId = id?.split(':')[1];
+                            if (recordId) {
+                                for (let [key, val] of this.data) {
+                                    if (val.id === parseInt(recordId)) {
+                                        this.data.delete(key);
+                                        break;
+                                    }
                                 }
                             }
                         }
-                        
                         this.updateCollectionSuggestions();
                         this.renderTable();
                         this.updateStats();
@@ -1177,24 +1080,25 @@
 
             async loadData(showLoading = true) {
                 if (!this.auth.isAuthenticated()) return;
-
                 if (showLoading) showLoadingOverlay();
 
                 try {
                     this.data.clear();
                     
+                    // Load all records except system
                     await this.security.db.map({}, (id, value) => {
-                        if (value && value.id && value.collection && value.collection !== 'system') {
+                        if (value && typeof value === 'object' && value.id && value.collection && value.collection !== 'system') {
                             this.data.set(`record:${value.id}`, value);
-                            if (value.id >= this.nextId) {
-                                this.nextId = value.id + 1;
-                            }
+                            if (value.id >= this.nextId) this.nextId = value.id + 1;
                         }
                     });
                     
                     this.updateCollectionSuggestions();
                     this.renderTable();
                     this.updateStats();
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    showNotification('Error loading data: ' + error.message, 'error');
                 } finally {
                     if (showLoading) hideLoadingOverlay();
                 }
@@ -1203,32 +1107,24 @@
             updateCollectionSuggestions() {
                 const collections = new Set();
                 Array.from(this.data.values()).forEach(record => {
-                    if (record.collection) {
-                        collections.add(record.collection);
-                    }
+                    if (record.collection) collections.add(record.collection);
                 });
                 
                 const suggestions = Array.from(collections).sort();
-                
                 const filterDatalist = document.getElementById('collectionSuggestions');
+                const modalDatalist = document.getElementById('collectionModalSuggestions');
+                
                 if (filterDatalist) {
                     filterDatalist.innerHTML = suggestions.map(c => `<option value="${c}">`).join('');
                 }
-                
-                const modalDatalist = document.getElementById('collectionModalSuggestions');
                 if (modalDatalist) {
                     modalDatalist.innerHTML = suggestions.map(c => `<option value="${c}">`).join('');
                 }
             }
 
             async createRecord(data) {
-                if (!this.auth.isAuthenticated()) {
-                    throw new Error('Not authenticated');
-                }
-
-                if (!data.collection || data.collection.trim() === '') {
-                    throw new Error('Collection name is required');
-                }
+                if (!this.auth.isAuthenticated()) throw new Error('Not authenticated');
+                if (!data.collection?.trim()) throw new Error('Collection name is required');
 
                 const id = this.nextId++;
                 const record = {
@@ -1243,111 +1139,91 @@
                 
                 await this.security.db.put(record, `record:${id}`);
                 this.data.set(`record:${id}`, record);
-                
                 return id;
             }
 
             async updateRecord(id, updates) {
-                if (!this.auth.isAuthenticated()) {
-                    throw new Error('Not authenticated');
-                }
-
+                if (!this.auth.isAuthenticated()) throw new Error('Not authenticated');
+                
                 const existing = await this.security.db.get(`record:${id}`);
-                if (!existing) {
-                    throw new Error('Record not found');
-                }
+                if (!existing) throw new Error('Record not found');
 
-                const sanitizedUpdates = {};
-                for (let [key, value] of Object.entries(updates)) {
-                    if (key === 'collection' || key === 'metaKey' || key === 'metaValue') {
-                        sanitizedUpdates[key] = this.security.sanitizeInput(value);
+                const sanitized = {};
+                for (let [k, v] of Object.entries(updates)) {
+                    if (k === 'collection' || k === 'metaKey' || k === 'metaValue') {
+                        sanitized[k] = this.security.sanitizeInput(v);
                     } else {
-                        sanitizedUpdates[key] = value;
+                        sanitized[k] = v;
                     }
                 }
-
-                const updated = { ...existing, ...sanitizedUpdates };
+                
+                const updated = { ...existing, ...sanitized };
                 await this.security.db.put(updated, `record:${id}`);
                 this.data.set(`record:${id}`, updated);
-                
                 return updated;
             }
 
             async deleteRecord(id) {
-                if (!this.auth.isAuthenticated()) {
-                    throw new Error('Not authenticated');
-                }
-
+                if (!this.auth.isAuthenticated()) throw new Error('Not authenticated');
                 await this.security.db.remove(`record:${id}`);
                 this.data.delete(`record:${id}`);
-                return true;
             }
 
             renderTable() {
                 const tbody = document.getElementById('tableBody');
                 if (!tbody) return;
-                
+
                 let records = Array.from(this.data.values());
                 
+                // Apply filters
                 if (this.filters.search) {
-                    const search = this.filters.search.toLowerCase();
+                    const s = this.filters.search.toLowerCase();
                     records = records.filter(r => 
-                        r.metaKey?.toLowerCase().includes(search) ||
-                        r.metaValue?.toLowerCase().includes(search)
+                        (r.metaKey?.toLowerCase() || '').includes(s) || 
+                        (r.metaValue?.toLowerCase() || '').includes(s)
                     );
                 }
-                
                 if (this.filters.collection) {
                     records = records.filter(r => 
-                        r.collection?.toLowerCase().includes(this.filters.collection.toLowerCase())
+                        (r.collection?.toLowerCase() || '').includes(this.filters.collection.toLowerCase())
                     );
                 }
-                
                 if (this.filters.repeater) {
-                    const isRepeater = this.filters.repeater === 'true';
-                    records = records.filter(r => r.repeater === isRepeater);
+                    records = records.filter(r => r.repeater === (this.filters.repeater === 'true'));
                 }
-                
+
+                // Sort
                 records.sort((a, b) => {
-                    let valA = a[this.sortField];
-                    let valB = b[this.sortField];
+                    let va = a[this.sortField];
+                    let vb = b[this.sortField];
                     
                     if (this.sortField === 'id' || this.sortField === 'relid') {
-                        valA = Number(valA) || 0;
-                        valB = Number(valB) || 0;
+                        va = Number(va) || 0;
+                        vb = Number(vb) || 0;
                     }
                     
-                    if (this.sortDirection === 'asc') {
-                        return valA > valB ? 1 : -1;
-                    } else {
-                        return valA < valB ? 1 : -1;
-                    }
+                    return this.sortDirection === 'asc' ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
                 });
-                
+
+                // Paginate
                 const start = (this.currentPage - 1) * this.pageSize;
-                const paginatedRecords = records.slice(start, start + this.pageSize);
-                
-                if (paginatedRecords.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="8" style="text-align: center; padding: 40px; color: #666;">
-                                📭 No records found. Click "Create New" to add one.
-                            </td>
-                        </tr>
-                    `;
+                const page = records.slice(start, start + this.pageSize);
+
+                if (page.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:40px;">📭 No records found. Click "Create New" to add one.</td></tr>';
                 } else {
-                    tbody.innerHTML = paginatedRecords.map(record => `
+                    tbody.innerHTML = page.map(r => `
                         <tr>
-                            <td><strong>${record.id}</strong></td>
-                            <td>${record.relid || 0}</td>
-                            <td>${record.repeater ? '🔄 Yes' : '❌ No'}</td>
-                            <td><span class="collection-badge">${record.collection}</span></td>
-                            <td><strong>${record.metaKey}</strong></td>
-                            <td>${record.metaValue}</td>
-                            <td>${new Date(record.dateCreated).toLocaleString()}</td>
+                            <td><strong>${r.id}</strong></td>
+                            <td>${r.relid || 0}</td>
+                            <td>${r.repeater ? '🔄 Yes' : '❌ No'}</td>
+                            <td><span class="collection-badge">${r.collection}</span></td>
+                            <td><strong>${r.metaKey}</strong></td>
+                            <td>${r.metaValue}</td>
+                            <td>${new Date(r.dateCreated).toLocaleString()}</td>
                             <td class="actions">
-                                <button class="action-btn edit-btn" onclick="editRecord(${record.id})">Edit</button>
-                                <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})">Delete</button>
+                                <button class="action-btn edit-btn" onclick="editRecord(${r.id})">Edit</button>
+                                <button class="action-btn delete-btn" onclick="deleteRecord(${r.id})">Delete</button>
                             </td>
                         </tr>
                     `).join('');
@@ -1356,34 +1232,28 @@
                 this.renderPagination(records.length);
             }
 
-            renderPagination(totalRecords) {
-                const totalPages = Math.ceil(totalRecords / this.pageSize);
+            renderPagination(total) {
+                const pages = Math.ceil(total / this.pageSize);
                 const pagination = document.getElementById('pagination');
                 
-                if (totalPages <= 1) {
+                if (pages <= 1) {
                     pagination.innerHTML = '';
                     return;
                 }
                 
                 let buttons = '';
-                for (let i = 1; i <= totalPages; i++) {
-                    buttons += `<button class="page-btn ${i === this.currentPage ? 'active' : ''}" 
-                        onclick="dbManager.goToPage(${i})">${i}</button>`;
+                for (let i = 1; i <= pages; i++) {
+                    buttons += `<button class="page-btn ${i === this.currentPage ? 'active' : ''}" onclick="dbManager.goToPage(${i})">${i}</button>`;
                 }
-                
                 pagination.innerHTML = buttons;
             }
 
             updateStats() {
                 const records = Array.from(this.data.values());
-                const collections = new Set(records.map(r => r.collection));
-                
                 document.getElementById('totalRecords').textContent = records.length;
-                document.getElementById('totalCollections').textContent = collections.size;
-                document.getElementById('totalUsers').textContent = 
-                    records.filter(r => r.collection === 'user').length;
-                document.getElementById('totalPosts').textContent = 
-                    records.filter(r => r.collection === 'post').length;
+                document.getElementById('totalCollections').textContent = new Set(records.map(r => r.collection)).size;
+                document.getElementById('totalUsers').textContent = records.filter(r => r.collection === 'user').length;
+                document.getElementById('totalPosts').textContent = records.filter(r => r.collection === 'post').length;
             }
 
             goToPage(page) {
@@ -1413,9 +1283,8 @@
         }
 
         // =============================================
-        // 5. UI CONTROLLER
+        // UI CONTROLLER
         // =============================================
-
         class UIController {
             constructor(security, auth, dbManager) {
                 this.security = security;
@@ -1426,6 +1295,8 @@
             async showAuth() {
                 document.getElementById('authContainer').style.display = 'flex';
                 document.getElementById('dashboardContainer').classList.remove('active');
+                document.getElementById('statusDot').className = 'status-dot disconnected';
+                document.getElementById('statusText').textContent = 'Disconnected';
             }
 
             async showDashboard() {
@@ -1436,6 +1307,9 @@
                 const badge = document.getElementById('userDisplayName');
                 badge.textContent = `👑 ${user.name}`;
                 badge.className = 'user-badge badge superadmin';
+                
+                document.getElementById('statusDot').className = 'status-dot';
+                document.getElementById('statusText').textContent = 'Connected';
                 
                 await this.dbManager.initRealtime();
                 await this.dbManager.loadData();
@@ -1450,42 +1324,31 @@
                 document.getElementById('adminConfirmPassword').value = '';
             }
 
-            showAuthAlert(message, type = 'error') {
+            showAuthAlert(message, type) {
                 const alert = document.getElementById('authAlert');
                 alert.textContent = message;
                 alert.className = `alert alert-${type} show`;
-                
-                setTimeout(() => {
-                    alert.classList.remove('show');
-                }, 5000);
+                setTimeout(() => alert.classList.remove('show'), 5000);
             }
         }
 
         // =============================================
-        // 6. NOTIFICATION SYSTEM
+        // NOTIFICATION SYSTEM
         // =============================================
-
         function showNotification(message, type = 'info', duration = 3000) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             
             const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
-            
-            toast.innerHTML = `
-                <span>${icon}</span>
-                <span>${message}</span>
-                <span class="toast-close" onclick="this.parentElement.remove()" style="margin-left:auto; cursor:pointer;">✕</span>
-            `;
+            toast.innerHTML = `<span>${icon}</span><span>${message}</span><span class="toast-close" onclick="this.parentElement.remove()" style="margin-left:auto; cursor:pointer;">✕</span>`;
             
             container.appendChild(toast);
-            
             setTimeout(() => {
                 toast.classList.add('fade-out');
                 setTimeout(() => toast.remove(), 300);
             }, duration);
         }
-
         window.showNotification = showNotification;
 
         function showLoadingOverlay() {
@@ -1496,22 +1359,17 @@
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 
-        function debounce(func, wait) {
+        function debounce(fn, wait) {
             let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
+            return (...args) => {
                 clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
+                timeout = setTimeout(() => fn(...args), wait);
             };
         }
 
         // =============================================
-        // 7. INITIALIZATION
+        // INITIALIZATION - FIXED
         // =============================================
-
         let security, auth, dbManager, ui;
 
         async function init() {
@@ -1520,137 +1378,121 @@
                 
                 security = new SecurityManager();
                 await security.initDB();
+                
+                // Initialize default settings
+                await security.initializeDefaultSettings();
+                
                 auth = new AuthManager(security);
                 dbManager = new DatabaseManager(security, auth);
                 ui = new UIController(security, auth, dbManager);
                 
                 document.getElementById('csrfToken').value = security.csrfToken;
-                
-                // Initialize default settings if none exist
-                const settings = await security.loadSettings();
-                if (!settings.password) {
-                    await security.saveSettings('admin@example.com', 'Admin123!');
+
+                // Add sample data if empty - FIXED with error handling
+                try {
+                    const records = [];
+                    await security.db.map({}, (id, value) => {
+                        if (value && value.collection && value.collection !== 'system') {
+                            records.push(value);
+                        }
+                    });
+                    
+                    if (records.length < 5) {
+                        const sampleData = [
+                            { relid: 1, collection: 'user', metaKey: 'firstname', metaValue: 'John' },
+                            { relid: 1, collection: 'user', metaKey: 'lastname', metaValue: 'Doe' },
+                            { relid: 1, collection: 'user', metaKey: 'email', metaValue: 'john@example.com', repeater: true },
+                            { relid: 2, collection: 'user', metaKey: 'firstname', metaValue: 'Jane' },
+                            { relid: 2, collection: 'user', metaKey: 'lastname', metaValue: 'Smith' },
+                            { relid: 1, collection: 'post', metaKey: 'title', metaValue: 'Hello World', repeater: true },
+                            { relid: 1, collection: 'post', metaKey: 'content', metaValue: 'This is my first post', repeater: true },
+                            { relid: 1, collection: 'product', metaKey: 'name', metaValue: 'Laptop' },
+                            { relid: 1, collection: 'product', metaKey: 'price', metaValue: '999.99' },
+                            { relid: 0, collection: 'setting', metaKey: 'site_name', metaValue: 'GenosDB Admin' }
+                        ];
+                        
+                        let id = 1;
+                        for (const item of sampleData) {
+                            try {
+                                await security.db.put({
+                                    id: id++,
+                                    relid: item.relid,
+                                    repeater: item.repeater || false,
+                                    collection: item.collection,
+                                    metaKey: item.metaKey,
+                                    metaValue: item.metaValue,
+                                    dateCreated: new Date().toISOString()
+                                }, `record:${id-1}`);
+                            } catch (e) {
+                                console.log('Error adding sample item:', e);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.log('Sample data error (non-critical):', e);
                 }
-                
+
+                // Check for existing session
                 const hasSession = await auth.checkExistingSession();
-                
                 if (hasSession) {
                     await ui.showDashboard();
                 } else {
                     ui.showAuth();
                 }
-                
-                // Add sample data if empty
-                await ensureSampleData();
-                
-                console.log('✅ App initialized');
+
+                console.log('✅ App initialized successfully');
+                hideLoadingOverlay();
             } catch (error) {
                 console.error('Init failed:', error);
-                showNotification('Failed to initialize: ' + error.message, 'error');
-            } finally {
+                showNotification('Init failed: ' + error.message, 'error');
                 hideLoadingOverlay();
             }
         }
 
-        async function ensureSampleData() {
-            const records = [];
-            await security.db.map({}, (id, value) => {
-                if (value.collection && value.collection !== 'system') records.push(value);
-            });
-            
-            if (records.length > 5) return;
-            
-            const sampleData = [
-                { relid: 1, collection: 'user', metaKey: 'firstname', metaValue: 'John' },
-                { relid: 1, collection: 'user', metaKey: 'lastname', metaValue: 'Doe' },
-                { relid: 1, collection: 'user', metaKey: 'email', metaValue: 'john@example.com', repeater: true },
-                { relid: 2, collection: 'user', metaKey: 'firstname', metaValue: 'Jane' },
-                { relid: 2, collection: 'user', metaKey: 'lastname', metaValue: 'Smith' },
-                { relid: 1, collection: 'post', metaKey: 'title', metaValue: 'Hello World', repeater: true },
-                { relid: 1, collection: 'post', metaKey: 'content', metaValue: 'This is my first post', repeater: true },
-                { relid: 1, collection: 'product', metaKey: 'name', metaValue: 'Laptop' },
-                { relid: 1, collection: 'product', metaKey: 'price', metaValue: '999.99' },
-                { relid: 0, collection: 'setting', metaKey: 'site_name', metaValue: 'GenosDB Admin' }
-            ];
-            
-            let id = 1;
-            for (const item of sampleData) {
-                await security.db.put({
-                    id: id++,
-                    relid: item.relid,
-                    repeater: item.repeater || false,
-                    collection: item.collection,
-                    metaKey: item.metaKey,
-                    metaValue: item.metaValue,
-                    dateCreated: new Date().toISOString()
-                }, `record:${id-1}`);
-            }
-        }
-
+        // Start the app
         init();
 
         // =============================================
-        // 8. GLOBAL FUNCTIONS
+        // GLOBAL FUNCTIONS
         // =============================================
-
         window.validateLoginForm = () => {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            const emailError = document.getElementById('loginEmailError');
-            const passwordError = document.getElementById('loginPasswordError');
             
-            let isValid = true;
+            document.getElementById('loginEmailError').textContent = !email ? 'Email required' : 
+                !security.validateEmail(email) ? 'Invalid email' : '';
+            document.getElementById('loginPasswordError').textContent = !password ? 'Password required' : '';
             
-            if (!email) {
-                emailError.textContent = 'Email is required';
-                isValid = false;
-            } else if (!security.validateEmail(email)) {
-                emailError.textContent = 'Invalid email format';
-                isValid = false;
-            } else {
-                emailError.textContent = '';
-            }
-            
-            if (!password) {
-                passwordError.textContent = 'Password is required';
-                isValid = false;
-            } else {
-                passwordError.textContent = '';
-            }
-            
-            document.getElementById('loginBtn').disabled = !isValid;
-            return isValid;
+            const valid = email && password && security.validateEmail(email);
+            document.getElementById('loginBtn').disabled = !valid;
+            return valid;
         };
 
-        window.handleLogin = async (event) => {
-            event.preventDefault();
+        window.handleLogin = async (e) => {
+            e.preventDefault();
             
             if (!validateLoginForm()) return;
             
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            const csrfToken = document.getElementById('csrfToken').value;
             
-            if (!security.validateCSRFToken(csrfToken)) {
+            if (!security.validateCSRFToken(document.getElementById('csrfToken').value)) {
                 ui.showAuthAlert('Invalid CSRF token', 'error');
                 return;
             }
-            
-            const loginBtn = document.getElementById('loginBtn');
-            loginBtn.disabled = true;
-            loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
-            
+
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Logging in...';
+
             try {
                 await auth.login(email, password);
                 ui.showAuthAlert('Login successful!', 'success');
-                
-                setTimeout(async () => {
-                    await ui.showDashboard();
-                }, 1000);
+                setTimeout(() => ui.showDashboard(), 1000);
             } catch (error) {
                 ui.showAuthAlert(error.message, 'error');
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = 'Login to Dashboard';
+                btn.disabled = false;
+                btn.innerHTML = 'Login to Dashboard';
             }
         };
 
@@ -1661,47 +1503,40 @@
                 document.getElementById('csrfToken').value = security.csrfToken;
                 ui.showAuth();
                 showNotification('Logged out successfully', 'success');
+            } catch (error) {
+                showNotification('Logout error: ' + error.message, 'error');
             } finally {
                 hideLoadingOverlay();
             }
         };
 
         window.switchTab = (tab) => {
-            const tabs = document.querySelectorAll('.tab-btn');
-            const dataTab = document.getElementById('dataTab');
-            const settingsTab = document.getElementById('settingsTab');
-            
-            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            document.getElementById('dataTab').classList.toggle('active', tab === 'data');
+            document.getElementById('settingsTab').classList.toggle('active', tab === 'settings');
             
             if (tab === 'data') {
-                tabs[0].classList.add('active');
-                dataTab.classList.add('active');
-                settingsTab.classList.remove('active');
+                document.querySelector('.tab-btn').classList.add('active');
             } else {
-                tabs[1].classList.add('active');
-                settingsTab.classList.add('active');
-                dataTab.classList.remove('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
                 loadSettings();
             }
         };
 
-        window.loadSettings = async () => {
-            await ui.loadSettings();
-        };
+        window.loadSettings = () => ui?.loadSettings();
 
-        window.updateCredentials = async (event) => {
-            event.preventDefault();
+        window.updateCredentials = async (e) => {
+            e.preventDefault();
             
-            const csrfToken = document.getElementById('settingsCsrfToken').value;
-            if (!security.validateCSRFToken(csrfToken)) {
+            if (!security.validateCSRFToken(document.getElementById('settingsCsrfToken').value)) {
                 showNotification('Invalid CSRF token', 'error');
                 return;
             }
-            
+
             const email = document.getElementById('adminEmail').value.trim();
             const password = document.getElementById('adminPassword').value;
             const confirm = document.getElementById('adminConfirmPassword').value;
-            
+
             // Validate email
             if (!security.validateEmail(email)) {
                 document.getElementById('adminEmailError').textContent = 'Invalid email format';
@@ -1709,7 +1544,7 @@
             } else {
                 document.getElementById('adminEmailError').textContent = '';
             }
-            
+
             // If password is provided, validate it
             if (password) {
                 if (password.length < 6) {
@@ -1721,26 +1556,27 @@
                     return;
                 }
             }
-            
+
             document.getElementById('adminPasswordError').textContent = '';
             document.getElementById('adminConfirmError').textContent = '';
-            
+
             showLoadingOverlay();
             
             try {
-                // Save settings with new credentials
+                // Save new credentials
                 await security.saveSettings(email, password || null);
                 
-                showNotification('Admin credentials updated successfully! You can now login with your new credentials.', 'success');
+                showNotification('Credentials updated! All sessions have been invalidated. Please login again.', 'success');
                 
-                // Clear password fields
-                document.getElementById('adminPassword').value = '';
-                document.getElementById('adminConfirmPassword').value = '';
-                
-                // Update CSRF token
+                // Clear all local data
+                security.clearSession();
                 security.csrfToken = security.generateCSRFToken();
-                document.getElementById('settingsCsrfToken').value = security.csrfToken;
                 document.getElementById('csrfToken').value = security.csrfToken;
+                
+                // Switch back to login screen
+                setTimeout(() => {
+                    ui.showAuth();
+                }, 2000);
                 
             } catch (error) {
                 showNotification('Error updating credentials: ' + error.message, 'error');
@@ -1749,27 +1585,31 @@
             }
         };
 
-        window.loadData = () => dbManager.loadData();
-        window.sortBy = (field) => dbManager.sortBy(field);
-        window.applyFilters = () => dbManager.applyFilters();
+        window.loadData = () => dbManager?.loadData();
+        window.sortBy = (f) => dbManager?.sortBy(f);
+        window.applyFilters = () => dbManager?.applyFilters();
         window.debounce = debounce;
-        
+
         window.editRecord = async (id) => {
-            const record = await security.db.get(`record:${id}`);
-            if (record) {
-                document.getElementById('csrfTokenModal').value = security.csrfToken;
-                document.getElementById('recordId').value = record.id;
-                document.getElementById('relid').value = record.relid;
-                document.getElementById('repeater').checked = record.repeater;
-                document.getElementById('collection').value = record.collection;
-                document.getElementById('metaKey').value = record.metaKey;
-                document.getElementById('metaValue').value = record.metaValue;
-                document.getElementById('dateCreated').value = record.dateCreated.slice(0, 16);
-                document.getElementById('modalTitle').textContent = `Edit Record #${id}`;
-                document.getElementById('modal').classList.add('active');
+            try {
+                const record = await security.db.get(`record:${id}`);
+                if (record) {
+                    document.getElementById('csrfTokenModal').value = security.csrfToken;
+                    document.getElementById('recordId').value = record.id;
+                    document.getElementById('relid').value = record.relid;
+                    document.getElementById('repeater').checked = record.repeater;
+                    document.getElementById('collection').value = record.collection;
+                    document.getElementById('metaKey').value = record.metaKey;
+                    document.getElementById('metaValue').value = record.metaValue;
+                    document.getElementById('dateCreated').value = record.dateCreated.slice(0, 16);
+                    document.getElementById('modalTitle').textContent = `Edit Record #${id}`;
+                    document.getElementById('modal').classList.add('active');
+                }
+            } catch (error) {
+                showNotification('Error loading record: ' + error.message, 'error');
             }
         };
-        
+
         window.deleteRecord = async (id) => {
             if (!security.validateCSRFToken(document.getElementById('csrfToken').value)) {
                 showNotification('Invalid CSRF token', 'error');
@@ -1785,7 +1625,7 @@
                 }
             }
         };
-        
+
         window.openCreateModal = () => {
             document.getElementById('csrfTokenModal').value = security.csrfToken;
             document.getElementById('recordId').value = '';
@@ -1797,19 +1637,17 @@
             document.getElementById('dateCreated').value = new Date().toISOString().slice(0, 16);
             document.getElementById('modalTitle').textContent = 'Create New Record';
             document.getElementById('modal').classList.add('active');
-            
-            dbManager.updateCollectionSuggestions();
+            dbManager?.updateCollectionSuggestions();
         };
-        
-        window.saveRecord = async (event) => {
-            event.preventDefault();
+
+        window.saveRecord = async (e) => {
+            e.preventDefault();
             
-            const csrfToken = document.getElementById('csrfTokenModal').value;
-            if (!security.validateCSRFToken(csrfToken)) {
+            if (!security.validateCSRFToken(document.getElementById('csrfTokenModal').value)) {
                 showNotification('Invalid CSRF token', 'error');
                 return;
             }
-            
+
             const id = document.getElementById('recordId').value;
             const collection = document.getElementById('collection').value.trim();
             
@@ -1819,7 +1657,7 @@
             } else {
                 document.getElementById('collectionError').textContent = '';
             }
-            
+
             const data = {
                 relid: parseInt(document.getElementById('relid').value) || 0,
                 repeater: document.getElementById('repeater').checked,
@@ -1828,7 +1666,7 @@
                 metaValue: document.getElementById('metaValue').value,
                 dateCreated: document.getElementById('dateCreated').value || new Date().toISOString()
             };
-            
+
             try {
                 if (id) {
                     await dbManager.updateRecord(parseInt(id), data);
@@ -1837,18 +1675,18 @@
                     const newId = await dbManager.createRecord(data);
                     showNotification(`Record #${newId} created!`, 'success');
                 }
-                
                 closeModal();
             } catch (error) {
                 showNotification('Error: ' + error.message, 'error');
             }
         };
-        
+
         window.closeModal = () => {
             document.getElementById('modal').classList.remove('active');
             document.getElementById('collectionError').textContent = '';
         };
 
+        // Initial validation
         setTimeout(validateLoginForm, 100);
     </script>
 </body>
