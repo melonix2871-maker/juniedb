@@ -140,18 +140,17 @@
             <small>CMS + DB Admin in one file</small>
           </div>
         </div>
-        <div class="status" style="margin-bottom:18px;">Default superadmin: <strong>demo</strong> / <strong>demo</strong></div>
+        <div class="status" style="margin-bottom:18px;">Default superadmin login: <strong>demo</strong> / <strong>demo</strong></div>
         <div class="field"><label>Username</label><input id="loginUser" type="text" value="demo" /></div>
         <div class="field"><label>Password</label><input id="loginPass" type="password" value="demo" /></div>
         <div class="tiny-row">
           <button id="loginBtn" class="btn">Login</button>
-          <button id="seedBtnLogin" class="btn-soft">Seed Demo (login first)</button>
+          <button id="seedBtn" class="btn-soft">Seed Demo Content</button>
         </div>
         <p id="loginMsg" class="footer-note"></p>
       </div>
     </div>
   </div>
-
   <div id="appShell" class="app-shell hidden">
     <aside class="sidebar">
       <div class="brand">
@@ -172,7 +171,7 @@
       </div>
       <div class="sidebar-card">
         <p><strong>Scope</strong></p>
-        <p>Single-file prototype CMS + DB admin powered by GenosDB.</p>
+        <p>This is a working single-file prototype modeled after CMS and phpMyAdmin workflows, powered by GenosDB storage and live collections.</p>
       </div>
       <div class="sidebar-card">
         <p><strong>Current DB</strong></p>
@@ -190,9 +189,6 @@
             <h2>Dashboard</h2>
             <p>Manage pages, posts, theme settings, and low-level table data.</p>
           </div>
-          <div class="actions">
-            <button id="seedBtnDash" class="btn-soft">Seed Demo Content</button>
-          </div>
         </div>
         <div class="cards">
           <div class="card"><h3>Pages</h3><div class="metric" id="metricPages">0</div></div>
@@ -200,19 +196,180 @@
           <div class="card"><h3>Tables</h3><div class="metric" id="metricTables">0</div></div>
           <div class="card"><h3>Rows</h3><div class="metric" id="metricRows">0</div></div>
         </div>
-        <!-- rest of dashboard unchanged for brevity -->
-        <div id="statusBar" class="footer-note"></div>
+        <div class="layout">
+          <div class="panel">
+            <div class="panel-head"><h3>Recent Content</h3><span class="pill">Live</span></div>
+            <div class="panel-body"><div id="recentContent" class="list"></div></div>
+          </div>
+          <div class="stack">
+            <div class="panel"><div class="panel-head"><h3>Quick Actions</h3></div><div class="panel-body tiny-row">
+              <button class="btn" data-jump="pages">New Page</button>
+              <button class="btn-soft" data-jump="posts">New Post</button>
+              <button class="btn-soft" data-jump="database">New Table</button>
+            </div></div>
+            <div class="panel"><div class="panel-head"><h3>Site Snapshot</h3></div><div class="panel-body" id="siteSnapshot"></div></div>
+          </div>
+        </div>
       </section>
-
-      <!-- Other sections (pages, posts, etc.) remain the same as your original - omitted here to keep response shorter -->
-
+      <section id="section-pages" class="section">
+        <div class="topbar">
+          <div><h2>Pages</h2><p>Create and edit frontend pages.</p></div>
+        </div>
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head"><h3>Page List</h3></div>
+            <div class="panel-body">
+              <div class="toolbar"><input id="pageSearch" type="search" placeholder="Search pages..." /></div>
+              <div id="pagesList" class="list"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 id="pageFormTitle">New Page</h3></div>
+            <div class="panel-body">
+              <div class="field"><label>Title</label><input id="pageTitle" type="text" /></div>
+              <div class="row">
+                <div class="field"><label>Slug</label><input id="pageSlug" type="text" placeholder="about-us" /></div>
+                <div class="field"><label>Status</label><select id="pageStatus"><option>draft</option><option selected>published</option></select></div>
+              </div>
+              <div class="field"><label>Excerpt</label><textarea id="pageExcerpt"></textarea></div>
+              <div class="field"><label>Content (HTML allowed)</label><textarea id="pageContent" style="min-height:220px"></textarea></div>
+              <div class="tiny-row">
+                <button id="savePageBtn" class="btn">Save Page</button>
+                <button id="resetPageBtn" class="btn-soft">Reset</button>
+                <button id="deletePageBtn" class="btn-danger hidden">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="section-posts" class="section">
+        <div class="topbar">
+          <div><h2>Posts</h2><p>Manage articles, updates, and news posts.</p></div>
+        </div>
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head"><h3>Post List</h3></div>
+            <div class="panel-body">
+              <div class="toolbar"><input id="postSearch" type="search" placeholder="Search posts..." /></div>
+              <div id="postsList" class="list"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 id="postFormTitle">New Post</h3></div>
+            <div class="panel-body">
+              <div class="field"><label>Title</label><input id="postTitle" type="text" /></div>
+              <div class="row">
+                <div class="field"><label>Slug</label><input id="postSlug" type="text" placeholder="hello-world" /></div>
+                <div class="field"><label>Status</label><select id="postStatus"><option>draft</option><option selected>published</option></select></div>
+              </div>
+              <div class="row">
+                <div class="field"><label>Category</label><input id="postCategory" type="text" placeholder="News" /></div>
+                <div class="field"><label>Author</label><input id="postAuthor" type="text" placeholder="Superadmin" /></div>
+              </div>
+              <div class="field"><label>Excerpt</label><textarea id="postExcerpt"></textarea></div>
+              <div class="field"><label>Content (HTML allowed)</label><textarea id="postContent" style="min-height:220px"></textarea></div>
+              <div class="tiny-row">
+                <button id="savePostBtn" class="btn">Save Post</button>
+                <button id="resetPostBtn" class="btn-soft">Reset</button>
+                <button id="deletePostBtn" class="btn-danger hidden">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="section-headerfooter" class="section">
+        <div class="topbar">
+          <div><h2>Header & Footer</h2><p>Set logo, nav items, CTA, and footer links.</p></div>
+        </div>
+        <div class="split">
+          <div class="panel"><div class="panel-head"><h3>Header Settings</h3></div><div class="panel-body">
+            <div class="field"><label>Site Name</label><input id="siteName" type="text" /></div>
+            <div class="field"><label>Site Tagline</label><input id="siteTagline" type="text" /></div>
+            <div class="field"><label>Header Navigation (one label|url per line)</label><textarea id="headerNav"></textarea></div>
+            <div class="row">
+              <div class="field"><label>Primary CTA Label</label><input id="headerCtaLabel" type="text" /></div>
+              <div class="field"><label>Primary CTA URL</label><input id="headerCtaUrl" type="text" /></div>
+            </div>
+          </div></div>
+          <div class="panel"><div class="panel-head"><h3>Footer Settings</h3></div><div class="panel-body">
+            <div class="field"><label>Footer Text</label><textarea id="footerText"></textarea></div>
+            <div class="field"><label>Footer Links (one label|url per line)</label><textarea id="footerLinks"></textarea></div>
+            <div class="field"><label>Custom CSS</label><textarea id="customCss"></textarea></div>
+            <div class="tiny-row"><button id="saveThemeBtn" class="btn">Save Theme Settings</button></div>
+          </div></div>
+        </div>
+      </section>
+      <section id="section-settings" class="section">
+        <div class="topbar">
+          <div><h2>Settings</h2><p>Core site settings and superadmin credentials.</p></div>
+        </div>
+        <div class="split">
+          <div class="panel"><div class="panel-head"><h3>General Settings</h3></div><div class="panel-body">
+            <div class="row">
+              <div class="field"><label>Homepage Slug</label><input id="homepageSlug" type="text" placeholder="home" /></div>
+              <div class="field"><label>Posts Page Slug</label><input id="postsPageSlug" type="text" placeholder="blog" /></div>
+            </div>
+            <div class="field"><label>Meta Description</label><textarea id="metaDescription"></textarea></div>
+            <div class="field"><label>Announcement Bar</label><input id="announcementBar" type="text" /></div>
+            <div class="tiny-row"><button id="saveSettingsBtn" class="btn">Save General Settings</button></div>
+          </div></div>
+          <div class="panel"><div class="panel-head"><h3>Superadmin</h3></div><div class="panel-body">
+            <div class="status" style="margin-bottom:12px">Default is demo/demo. Change below and it becomes the new login.</div>
+            <div class="field"><label>Username</label><input id="adminUser" type="text" /></div>
+            <div class="field"><label>New Password</label><input id="adminPass" type="password" placeholder="Leave blank to keep current password" /></div>
+            <div class="tiny-row"><button id="saveAdminBtn" class="btn">Update Superadmin</button></div>
+          </div></div>
+        </div>
+      </section>
+      <section id="section-database" class="section">
+        <div class="topbar">
+          <div><h2>DB Manager</h2><p>phpMyAdmin-style table, columns, row, and filter manager.</p></div>
+        </div>
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head"><h3>Tables</h3></div>
+            <div class="panel-body">
+              <div class="toolbar"><input id="tableSearch" type="search" placeholder="Search tables..." /><button id="newTableBtn" class="btn fit">New Table</button></div>
+              <div id="tablesList" class="list"></div>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="panel"><div class="panel-head"><h3 id="tableEditorTitle">Table Editor</h3></div><div class="panel-body">
+              <div class="field"><label>Table Name</label><input id="tableName" type="text" placeholder="products" /></div>
+              <div class="field"><label>Columns (comma separated)</label><input id="tableColumns" type="text" placeholder="name,sku,price,status" /></div>
+              <div class="tiny-row">
+                <button id="saveTableBtn" class="btn">Save Table</button>
+                <button id="resetTableBtn" class="btn-soft">Reset</button>
+                <button id="deleteTableBtn" class="btn-danger hidden">Delete Table</button>
+              </div>
+            </div></div>
+            <div class="panel"><div class="panel-head"><h3>Rows</h3><span id="selectedTableBadge" class="pill">No table selected</span></div><div class="panel-body">
+              <div id="rowsControls" class="hidden">
+                <div class="toolbar">
+                  <input id="rowFilter" type="search" placeholder="Filter row values..." />
+                  <button id="addRowBtn" class="btn fit">Add Row</button>
+                </div>
+                <div id="rowFormWrap"></div>
+                <div style="overflow:auto"><table><thead id="rowsHead"></thead><tbody id="rowsBody"></tbody></table></div>
+              </div>
+              <div id="rowsEmpty" class="empty">Select a table to manage rows.</div>
+            </div></div>
+          </div>
+        </div>
+      </section>
+      <section id="section-preview" class="section">
+        <div class="topbar">
+          <div><h2>Site Preview</h2><p>Generated from your CMS content and theme settings.</p></div>
+          <div class="actions"><select id="previewPageSelect"></select></div>
+        </div>
+        <div class="panel"><div class="panel-body"><div id="sitePreview" class="preview-box"></div></div></div>
+      </section>
+      <div id="statusBar" class="footer-note"></div>
     </main>
   </div>
-
   <script type="module">
     import { gdb } from 'https://cdn.jsdelivr.net/npm/genosdb@0.12.7/dist/index.min.js';
-
-    const $ = id => document.getElementById(id);
+    const $ = (id) => document.getElementById(id);
     const state = {
       db: null,
       ready: false,
@@ -229,194 +386,484 @@
       selectedTableId: null,
       editingRowId: null,
     };
-
     async function sha256(text) {
       const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
     }
-
-    function setStatus(text, tone = '') {
-      const bar = $('statusBar') || $('loginMsg');
-      if (bar) {
-        bar.textContent = text;
-        bar.className = `footer-note ${tone}`;
-      }
-      console.log(`[STATUS] ${text}`);
+    function setStatus(text, tone='') {
+      $('statusBar').innerHTML = text;
+      $('statusBar').className = `footer-note ${tone}`;
     }
-
     function nowISO() { return new Date().toISOString(); }
-
-    function slugify(text = '') {
-      return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'untitled';
+    function sortByUpdatedDesc(arr){ return [...arr].sort((a,b)=> new Date(b.updatedAt||b.createdAt||0)-new Date(a.updatedAt||a.createdAt||0)); }
+    function slugify(text=''){ return text.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'untitled'; }
+    function parseLinks(text=''){
+      return text.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{
+        const [label,url] = line.split('|');
+        return { label:(label||'Link').trim(), url:(url||'#').trim() };
+      });
     }
-
-    function esc(v) {
-      return String(v ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-    }
-
-    function upsertCollection(name, id, value) {
-      const arr = state[name];
+    function esc(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function upsertCollection(collectionName, id, value) {
+      const arr = state[collectionName];
       const i = arr.findIndex(item => item.id === id);
-      if (i >= 0) arr[i] = { id, ...value };
-      else arr.push({ id, ...value });
+      const record = { id, ...value };
+      if (i >= 0) arr[i] = record; else arr.push(record);
     }
-
-    function removeCollectionItem(name, id) {
-      state[name] = state[name].filter(item => item.id !== id);
+    function removeCollectionItem(collectionName, id) {
+      state[collectionName] = state[collectionName].filter(item => item.id !== id);
     }
-
     async function initDb() {
       setStatus('Connecting to GenosDB...');
-      try {
-        state.db = await gdb('genosdb-cms-suite', { rtc: false }); // stable for GH Pages
-        $('dbStateText').textContent = 'Connected (rtc:false)';
-        state.ready = true;
-        setStatus('GenosDB ready!', 'success');
-
-        await Promise.all([
-          subscribeCollection('pages', { type: 'cms_page' }),
-          subscribeCollection('posts', { type: 'cms_post' }),
-          subscribeCollection('tables', { type: 'db_table' }),
-          subscribeCollection('rows', { type: 'db_row' }),
-          subscribeSingleton('settings', { type: 'cms_settings' }),
-          subscribeSingleton('theme', { type: 'cms_theme' }),
-          subscribeSingleton('admin', { type: 'cms_admin' })
-        ]);
-
-        await ensureDefaults();
+      state.db = await gdb('genosdb-cms-suite', { rtc: false });
+      $('dbStateText').textContent = 'Connected to GenosDB with rtc:false';
+      state.ready = true;
+      await subscribeCollection('pages', { type: 'cms_page' });
+      await subscribeCollection('posts', { type: 'cms_post' });
+      await subscribeCollection('tables', { type: 'db_table' });
+      await subscribeCollection('rows', { type: 'db_row' });
+      await subscribeSingleton('settings', { type: 'cms_settings' });
+      await subscribeSingleton('theme', { type: 'cms_theme' });
+      await subscribeSingleton('admin', { type: 'cms_admin' });
+      setStatus('GenosDB connected. Live collections are active.');
+    }
+    async function subscribeCollection(collectionName, query) {
+      await state.db.map({ query, field: 'updatedAt', order: 'desc' }, ({ id, value, action }) => {
+        if (action === 'removed') removeCollectionItem(collectionName, id);
+        else upsertCollection(collectionName, id, value);
         renderAll();
-      } catch (err) {
-        console.error('DB init failed:', err);
-        setStatus(`Connection failed: ${err.message}. Refresh or check console.`, 'danger');
-      }
+      });
     }
-
-    async function subscribeCollection(name, query) {
-      try {
-        await state.db.map({ query, field: 'updatedAt', order: 'desc' }, ({ id, value, action }) => {
-          if (action === 'removed') removeCollectionItem(name, id);
-          else upsertCollection(name, id, value);
-          renderAll();
-        });
-      } catch (e) {
-        console.error(`Subscribe ${name} failed:`, e);
-      }
-    }
-
     async function subscribeSingleton(name, query) {
-      try {
-        await state.db.map({ query, field: 'updatedAt', order: 'desc' }, ({ id, value, action }) => {
-          state[name] = action === 'removed' ? null : { id, ...value };
-          renderAll();
-        });
-      } catch (e) {
-        console.error(`Subscribe singleton ${name} failed:`, e);
+      await state.db.map({ query, field: 'updatedAt', order: 'desc' }, ({ id, value, action }) => {
+        if (action === 'removed') state[name] = null;
+        else state[name] = { id, ...value };
+        renderAll();
+      });
+    }
+    async function saveDoc(existingId, payload) {
+      if (!state.ready) return;
+      if (existingId) await state.db.put(payload, existingId);
+      else await state.db.put(payload);
+    }
+    async function deleteDoc(id) {
+      if (!id) return;
+      if (confirm('Are you sure you want to delete this?')) {
+        await state.db.remove(id);
       }
     }
-
-    async function saveDoc(id, payload) {
-      if (!state.ready || !state.db) {
-        setStatus('Database not ready yet.', 'danger');
-        return false;
-      }
-      try {
-        if (id) await state.db.put(payload, id);
-        else await state.db.put(payload);
-        return true;
-      } catch (e) {
-        console.error('Save failed:', e);
-        setStatus(`Save error: ${e.message}`, 'danger');
-        return false;
-      }
+    function getAdminFallback() {
+      return { username: 'demo', passwordHash: null };
     }
-
     async function ensureDefaults() {
       if (!state.admin) {
-        const hash = await sha256('demo');
-        await saveDoc(null, { type: 'cms_admin', username: 'demo', passwordHash: hash, createdAt: nowISO(), updatedAt: nowISO() });
+        await saveDoc(null, { type:'cms_admin', username:'demo', passwordHash: await sha256('demo'), createdAt: nowISO(), updatedAt: nowISO() });
       }
-      // ... other defaults (settings, theme) similar
+      if (!state.settings) {
+        await saveDoc(null, { type:'cms_settings', homepageSlug:'home', postsPageSlug:'blog', metaDescription:'A GenosDB-powered site.', announcementBar:'Welcome to your GenosDB CMS.', createdAt: nowISO(), updatedAt: nowISO() });
+      }
+      if (!state.theme) {
+        await saveDoc(null, { type:'cms_theme', siteName:'Genos Site', siteTagline:'Powered by GenosDB', headerNav:'Home|/home\nBlog|/blog\nContact|/contact', headerCtaLabel:'Get Started', headerCtaUrl:'#', footerText:'© 2026 Genos Site. All rights reserved.', footerLinks:'Privacy|#\nTerms|#', customCss:'', createdAt: nowISO(), updatedAt: nowISO() });
+      }
     }
-
-    async function seedDemoContent() {
-      console.log('Seed clicked | ready:', state.ready, '| pages:', state.pages.length);
-      if (!state.ready) {
-        setStatus('Database still connecting — try again in a few seconds.', 'warning');
-        return;
-      }
-      if (state.pages.length > 0 || state.posts.length > 0) {
-        setStatus('Demo content already exists (found pages/posts). Clear storage if you want to re-seed.', 'warning');
-        return;
-      }
-      setStatus('Seeding demo content...');
-      const stamp = nowISO();
-      const success = await Promise.all([
-        saveDoc(null, { type: 'cms_page', title: 'Home', slug: 'home', status: 'published', excerpt: 'Homepage', content: '<h1>Welcome</h1><p>GenosDB CMS ready.</p>', createdAt: stamp, updatedAt: stamp }),
-        saveDoc(null, { type: 'cms_page', title: 'About', slug: 'about', status: 'published', excerpt: 'About', content: '<h1>About</h1><p>Single-file app.</p>', createdAt: stamp, updatedAt: stamp }),
-        saveDoc(null, { type: 'cms_post', title: 'First Post', slug: 'first-post', status: 'published', category: 'News', author: 'Demo', excerpt: 'Intro', content: '<p>Hello from GenosDB!</p>', createdAt: stamp, updatedAt: stamp }),
-        saveDoc(null, { type: 'db_table', name: 'products', columns: ['name', 'price', 'stock'], createdAt: stamp, updatedAt: stamp })
-      ].map(p => p.catch(e => { console.error(e); return false; })));
-
-      if (success.every(Boolean)) {
-        setStatus('Demo content seeded successfully! Refresh if metrics not updated.', 'success');
-      } else {
-        setStatus('Partial/failed seeding — check console.', 'danger');
-      }
-      renderAll();
-    }
-
     async function login() {
       const user = $('loginUser').value.trim();
       const pass = $('loginPass').value;
-      if (!state.admin) {
-        $('loginMsg').textContent = 'Admin data not loaded yet.';
-        return;
-      }
-      const ok = user === state.admin.username && await sha256(pass) === state.admin.passwordHash;
+      const admin = state.admin || getAdminFallback();
+      const ok = user === (admin.username || 'demo') && await sha256(pass) === (admin.passwordHash || await sha256('demo'));
+      $('loginMsg').textContent = ok ? 'Login successful.' : 'Invalid credentials.';
       if (ok) {
-        localStorage.setItem('genosdb-cms-auth', JSON.stringify({ user, at: Date.now() }));
-        state.auth = { user };
+        localStorage.setItem('genosdb-cms-auth', JSON.stringify({ username:user, at:Date.now() }));
+        state.auth = { username:user };
         $('loginScreen').classList.add('hidden');
         $('appShell').classList.remove('hidden');
         renderAll();
-        setStatus('Logged in. Try seeding from Dashboard if needed.');
-      } else {
-        $('loginMsg').textContent = 'Invalid credentials.';
       }
     }
-
-    function renderAll() {
-      if (!state.ready) return;
+    function logout() {
+      localStorage.removeItem('genosdb-cms-auth');
+      state.auth = null;
+      $('appShell').classList.add('hidden');
+      $('loginScreen').classList.remove('hidden');
+    }
+    async function tryAutoLogin() {
+      const raw = localStorage.getItem('genosdb-cms-auth');
+      if (!raw) return;
+      try {
+        state.auth = JSON.parse(raw);
+        $('loginScreen').classList.add('hidden');
+        $('appShell').classList.remove('hidden');
+      } catch {}
+    }
+    async function seedDemoContent() {
+      const hasPages = state.pages.length > 0;
+      if (hasPages) { $('loginMsg').textContent = 'Demo data already exists.'; return; }
+      const stamp = nowISO();
+      await saveDoc(null, { type:'cms_page', title:'Home', slug:'home', status:'published', excerpt:'Homepage', content:'<h1>Welcome</h1><p>Your GenosDB CMS is ready.</p>', createdAt:stamp, updatedAt:stamp });
+      await saveDoc(null, { type:'cms_page', title:'About', slug:'about', status:'published', excerpt:'About us', content:'<h1>About Us</h1><p>This site is running from a single HTML file.</p>', createdAt:stamp, updatedAt:stamp });
+      await saveDoc(null, { type:'cms_post', title:'Hello GenosDB', slug:'hello-genosdb', status:'published', category:'News', author:'Superadmin', excerpt:'First post', content:'<p>This is a CMS post stored in GenosDB.</p>', createdAt:stamp, updatedAt:stamp });
+      await saveDoc(null, { type:'db_table', name:'products', columns:['name','sku','price','status'], createdAt:stamp, updatedAt:stamp });
+      $('loginMsg').textContent = 'Demo content seeded.';
+    }
+    function switchSection(name) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('#navTabs button').forEach(b => b.classList.toggle('active', b.dataset.section === name));
+      $('section-' + name).classList.add('active');
+    }
+    function renderDashboard() {
       $('metricPages').textContent = state.pages.length;
       $('metricPosts').textContent = state.posts.length;
       $('metricTables').textContent = state.tables.length;
       $('metricRows').textContent = state.rows.length;
-      // ... other renders (dashboard, lists, etc.)
+      const recent = sortByUpdatedDesc([...state.pages.map(x=>({...x,_kind:'Page'})), ...state.posts.map(x=>({...x,_kind:'Post'}))]).slice(0,6);
+      $('recentContent').innerHTML = recent.length ? recent.map(item => `
+        <div class="list-item">
+          <strong>${esc(item.title)}</strong>
+          <small>${item._kind} · /${esc(item.slug || '')} · ${esc(item.status || 'draft')}</small>
+        </div>`).join('') : '<div class="empty">No pages or posts yet.</div>';
+      const theme = state.theme || {};
+      const settings = state.settings || {};
+      $('siteSnapshot').innerHTML = `
+        <div class="list-item"><strong>${esc(theme.siteName || 'Genos Site')}</strong><small>${esc(theme.siteTagline || '')}</small></div>
+        <div class="list-item"><strong>Homepage</strong><small>/${esc(settings.homepageSlug || 'home')}</small></div>
+        <div class="list-item"><strong>Announcement</strong><small>${esc(settings.announcementBar || '—')}</small></div>`;
     }
-
-    // Event listeners
-    document.addEventListener('click', e => {
-      const t = e.target;
-      if (t.id === 'loginBtn') login();
-      if (t.id === 'seedBtnLogin' || t.id === 'seedBtnDash') seedDemoContent();
-      // ... other handlers from original
-    });
-
-    // Auto-login attempt + init
-    (async () => {
-      await initDb();
-      // Try auto-login from localStorage...
-      const raw = localStorage.getItem('genosdb-cms-auth');
-      if (raw) {
-        try {
-          state.auth = JSON.parse(raw);
-          $('loginScreen').classList.add('hidden');
-          $('appShell').classList.remove('hidden');
-          renderAll();
-        } catch {}
+    function renderPages() {
+      const q = $('pageSearch').value.trim().toLowerCase();
+      const items = sortByUpdatedDesc(state.pages).filter(p => !q || JSON.stringify(p).toLowerCase().includes(q));
+      $('pagesList').innerHTML = items.length ? items.map(p => `
+        <div class="list-item">
+          <strong>${esc(p.title)}</strong>
+          <small>/${esc(p.slug)} · ${esc(p.status)}</small>
+          <div class="tiny-row" style="margin-top:10px">
+            <button class="btn-soft" data-edit-page="${p.id}">Edit</button>
+          </div>
+        </div>`).join('') : '<div class="empty">No pages yet.</div>';
+    }
+    function renderPosts() {
+      const q = $('postSearch').value.trim().toLowerCase();
+      const items = sortByUpdatedDesc(state.posts).filter(p => !q || JSON.stringify(p).toLowerCase().includes(q));
+      $('postsList').innerHTML = items.length ? items.map(p => `
+        <div class="list-item">
+          <strong>${esc(p.title)}</strong>
+          <small>/${esc(p.slug)} · ${esc(p.category || 'Uncategorized')} · ${esc(p.status)}</small>
+          <div class="tiny-row" style="margin-top:10px">
+            <button class="btn-soft" data-edit-post="${p.id}">Edit</button>
+          </div>
+        </div>`).join('') : '<div class="empty">No posts yet.</div>';
+    }
+    function renderTheme() {
+      const t = state.theme || {};
+      $('siteName').value = t.siteName || '';
+      $('siteTagline').value = t.siteTagline || '';
+      $('headerNav').value = t.headerNav || '';
+      $('headerCtaLabel').value = t.headerCtaLabel || '';
+      $('headerCtaUrl').value = t.headerCtaUrl || '';
+      $('footerText').value = t.footerText || '';
+      $('footerLinks').value = t.footerLinks || '';
+      $('customCss').value = t.customCss || '';
+    }
+    function renderSettings() {
+      const s = state.settings || {};
+      const a = state.admin || {};
+      $('homepageSlug').value = s.homepageSlug || 'home';
+      $('postsPageSlug').value = s.postsPageSlug || 'blog';
+      $('metaDescription').value = s.metaDescription || '';
+      $('announcementBar').value = s.announcementBar || '';
+      $('adminUser').value = a.username || 'demo';
+      $('adminPass').value = '';
+    }
+    function renderTables() {
+      const q = $('tableSearch').value.trim().toLowerCase();
+      const items = sortByUpdatedDesc(state.tables).filter(t => !q || JSON.stringify(t).toLowerCase().includes(q));
+      $('tablesList').innerHTML = items.length ? items.map(t => `
+        <div class="list-item">
+          <strong>${esc(t.name)}</strong>
+          <small>${(t.columns || []).length} columns · ${state.rows.filter(r => r.tableId === t.id).length} rows</small>
+          <div class="tiny-row" style="margin-top:10px">
+            <button class="btn-soft" data-edit-table="${t.id}">Open</button>
+          </div>
+        </div>`).join('') : '<div class="empty">No tables yet.</div>';
+      renderRowsPanel();
+    }
+    function renderRowsPanel() {
+      const table = state.tables.find(t => t.id === state.selectedTableId);
+      if (!table) {
+        $('rowsControls').classList.add('hidden');
+        $('rowsEmpty').classList.remove('hidden');
+        $('selectedTableBadge').textContent = 'No table selected';
+        return;
       }
-    })();
-
+      $('rowsControls').classList.remove('hidden');
+      $('rowsEmpty').classList.add('hidden');
+      $('selectedTableBadge').textContent = table.name;
+      const columns = table.columns || [];
+      const filter = $('rowFilter').value.trim().toLowerCase();
+      const rows = state.rows.filter(r => r.tableId === table.id).filter(r => !filter || JSON.stringify(r.data || {}).toLowerCase().includes(filter));
+      $('rowsHead').innerHTML = `<tr>${columns.map(c => `<th>${esc(c)}</th>`).join('')}<th>Actions</th></tr>`;
+      $('rowsBody').innerHTML = rows.length ? rows.map(r => `<tr>${columns.map(c => `<td>${esc((r.data || {})[c] || '')}</td>`).join('')}<td><div class="tiny-row"><button class="btn-soft" data-edit-row="${r.id}">Edit</button><button class="btn-danger" data-del-row="${r.id}">Delete</button></div></td></tr>`).join('') : `<tr><td colspan="${columns.length+1}"><div class="empty">No rows found.</div></td></tr>`;
+      renderRowForm();
+    }
+    function renderRowForm() {
+      const table = state.tables.find(t => t.id === state.selectedTableId);
+      if (!table) { $('rowFormWrap').innerHTML = ''; return; }
+      const row = state.rows.find(r => r.id === state.editingRowId);
+      $('rowFormWrap').innerHTML = `
+        <div class="panel" style="margin-bottom:14px"><div class="panel-body">
+          <div class="tiny-row" style="justify-content:space-between;align-items:center"><strong>${row ? 'Edit Row' : 'New Row'}</strong><button id="cancelRowEdit" class="btn-soft ${row ? '' : 'hidden'}">Cancel</button></div>
+          <div class="row" style="margin-top:12px">${(table.columns||[]).map(col => `
+            <div class="field"><label>${esc(col)}</label><input data-row-col="${esc(col)}" type="text" value="${esc((row?.data||{})[col] || '')}" /></div>`).join('')}</div>
+          <div class="tiny-row"><button id="saveRowBtn" class="btn">${row ? 'Update Row' : 'Save Row'}</button></div>
+        </div></div>`;
+    }
+    function renderPreview() {
+      const theme = state.theme || {};
+      const settings = state.settings || {};
+      const pageOptions = [
+        ...state.pages.map(p => ({ label:`Page: ${p.title}`, value:`page:${p.id}` })),
+        ...state.posts.map(p => ({ label:`Post: ${p.title}`, value:`post:${p.id}` })),
+      ];
+      $('previewPageSelect').innerHTML = pageOptions.map(o => `<option value="${o.value}">${esc(o.label)}</option>`).join('');
+      const selectedValue = $('previewPageSelect').value || pageOptions[0]?.value;
+      if (selectedValue) $('previewPageSelect').value = selectedValue;
+      let content = '<h1>No content yet</h1>';
+      const [kind,id] = (selectedValue || '').split(':');
+      const node = kind === 'post' ? state.posts.find(x => x.id === id) : state.pages.find(x => x.id === id);
+      if (node) content = node.content || `<h1>${esc(node.title)}</h1>`;
+      const headerLinks = parseLinks(theme.headerNav || '');
+      const footerLinks = parseLinks(theme.footerLinks || '');
+      $('sitePreview').innerHTML = `
+        <style>${theme.customCss || ''}</style>
+        <div style="font-family:Inter,system-ui,sans-serif;color:#eaf2ff;background:#091426;border-radius:16px;border:1px solid #253455;overflow:hidden">
+          <div style="padding:10px 18px;background:#102142;color:#cde0ff;font-size:13px">${esc(settings.announcementBar || '')}</div>
+          <header style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:18px;border-bottom:1px solid #253455;flex-wrap:wrap">
+            <div><div style="font-size:20px;font-weight:800">${esc(theme.siteName || 'Genos Site')}</div><div style="color:#98acd4;font-size:13px">${esc(theme.siteTagline || '')}</div></div>
+            <nav style="display:flex;gap:12px;flex-wrap:wrap">${headerLinks.map(l=>`<a style="color:#cde0ff;text-decoration:none" href="${esc(l.url)}">${esc(l.label)}</a>`).join('')}</nav>
+            <a href="${esc(theme.headerCtaUrl || '#')}" style="padding:10px 14px;border-radius:12px;background:#6ea8fe;color:#08111d;text-decoration:none;font-weight:700">${esc(theme.headerCtaLabel || 'CTA')}</a>
+          </header>
+          <main style="padding:28px 18px;min-height:220px">${content}</main>
+          <footer style="padding:18px;border-top:1px solid #253455;color:#98acd4">
+            <div style="margin-bottom:10px">${esc(theme.footerText || '')}</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">${footerLinks.map(l=>`<a style="color:#cde0ff;text-decoration:none" href="${esc(l.url)}">${esc(l.label)}</a>`).join('')}</div>
+          </footer>
+        </div>`;
+    }
+    function fillPageForm(item=null) {
+      state.selectedPageId = item?.id || null;
+      $('pageFormTitle').textContent = item ? 'Edit Page' : 'New Page';
+      $('pageTitle').value = item?.title || '';
+      $('pageSlug').value = item?.slug || '';
+      $('pageStatus').value = item?.status || 'published';
+      $('pageExcerpt').value = item?.excerpt || '';
+      $('pageContent').value = item?.content || '';
+      $('deletePageBtn').classList.toggle('hidden', !item);
+    }
+    function fillPostForm(item=null) {
+      state.selectedPostId = item?.id || null;
+      $('postFormTitle').textContent = item ? 'Edit Post' : 'New Post';
+      $('postTitle').value = item?.title || '';
+      $('postSlug').value = item?.slug || '';
+      $('postStatus').value = item?.status || 'published';
+      $('postCategory').value = item?.category || '';
+      $('postAuthor').value = item?.author || '';
+      $('postExcerpt').value = item?.excerpt || '';
+      $('postContent').value = item?.content || '';
+      $('deletePostBtn').classList.toggle('hidden', !item);
+    }
+    function fillTableForm(item=null) {
+      state.selectedTableId = item?.id || null;
+      state.editingRowId = null;
+      $('tableEditorTitle').textContent = item ? 'Edit Table' : 'Table Editor';
+      $('tableName').value = item?.name || '';
+      $('tableColumns').value = (item?.columns || []).join(',');
+      $('deleteTableBtn').classList.toggle('hidden', !item);
+      renderRowsPanel();
+    }
+    async function savePage() {
+      const title = $('pageTitle').value.trim();
+      if (!title) return setStatus('Page title is required.', 'danger');
+      const payload = {
+        type:'cms_page', title,
+        slug: slugify($('pageSlug').value || title),
+        status:$('pageStatus').value,
+        excerpt:$('pageExcerpt').value.trim(),
+        content:$('pageContent').value,
+        createdAt: state.pages.find(x => x.id === state.selectedPageId)?.createdAt || nowISO(),
+        updatedAt: nowISO(),
+      };
+      await saveDoc(state.selectedPageId, payload);
+      fillPageForm();
+      setStatus('Page saved.');
+    }
+    async function savePost() {
+      const title = $('postTitle').value.trim();
+      if (!title) return setStatus('Post title is required.', 'danger');
+      const payload = {
+        type:'cms_post', title,
+        slug: slugify($('postSlug').value || title),
+        status:$('postStatus').value,
+        category:$('postCategory').value.trim(),
+        author:$('postAuthor').value.trim() || 'Superadmin',
+        excerpt:$('postExcerpt').value.trim(),
+        content:$('postContent').value,
+        createdAt: state.posts.find(x => x.id === state.selectedPostId)?.createdAt || nowISO(),
+        updatedAt: nowISO(),
+      };
+      await saveDoc(state.selectedPostId, payload);
+      fillPostForm();
+      setStatus('Post saved.');
+    }
+    async function saveTheme() {
+      const payload = {
+        type:'cms_theme',
+        siteName:$('siteName').value.trim(),
+        siteTagline:$('siteTagline').value.trim(),
+        headerNav:$('headerNav').value,
+        headerCtaLabel:$('headerCtaLabel').value.trim(),
+        headerCtaUrl:$('headerCtaUrl').value.trim(),
+        footerText:$('footerText').value,
+        footerLinks:$('footerLinks').value,
+        customCss:$('customCss').value,
+        createdAt: state.theme?.createdAt || nowISO(),
+        updatedAt: nowISO(),
+      };
+      await saveDoc(state.theme?.id, payload);
+      setStatus('Theme settings saved.');
+    }
+    async function saveSettings() {
+      const payload = {
+        type:'cms_settings',
+        homepageSlug:slugify($('homepageSlug').value || 'home'),
+        postsPageSlug:slugify($('postsPageSlug').value || 'blog'),
+        metaDescription:$('metaDescription').value,
+        announcementBar:$('announcementBar').value,
+        createdAt: state.settings?.createdAt || nowISO(),
+        updatedAt: nowISO(),
+      };
+      await saveDoc(state.settings?.id, payload);
+      setStatus('General settings saved.');
+    }
+    async function saveAdmin() {
+      const username = $('adminUser').value.trim() || 'demo';
+      const pass = $('adminPass').value;
+      const currentHash = state.admin?.passwordHash || await sha256('demo');
+      const payload = {
+        type:'cms_admin', username,
+        passwordHash: pass ? await sha256(pass) : currentHash,
+        createdAt: state.admin?.createdAt || nowISO(),
+        updatedAt: nowISO(),
+      };
+      await saveDoc(state.admin?.id, payload);
+      $('adminPass').value = '';
+      setStatus('Superadmin updated.');
+    }
+    async function saveTable() {
+      const name = slugify($('tableName').value);
+      if (!name) return setStatus('Table name is required.', 'danger');
+      const columns = $('tableColumns').value.split(',').map(x => slugify(x)).filter(Boolean);
+      if (!columns.length) return setStatus('Add at least one column.', 'danger');
+      const payload = {
+        type:'db_table', name, columns,
+        createdAt: state.tables.find(x => x.id === state.selectedTableId)?.createdAt || nowISO(),
+        updatedAt: nowISO(),
+      };
+      await saveDoc(state.selectedTableId, payload);
+      const latest = state.tables.find(t => t.name === name) || payload;
+      fillTableForm(latest.id ? latest : null);
+      setStatus('Table saved.');
+    }
+    async function saveRow() {
+      const table = state.tables.find(t => t.id === state.selectedTableId);
+      if (!table) return;
+      const data = {};
+      document.querySelectorAll('[data-row-col]').forEach(input => data[input.dataset.rowCol] = input.value);
+      const payload = {
+        type:'db_row', tableId: table.id, tableName: table.name, data,
+        createdAt: state.rows.find(x => x.id === state.editingRowId)?.createdAt || nowISO(),
+        updatedAt: nowISO(),
+      };
+      await saveDoc(state.editingRowId, payload);
+      state.editingRowId = null;
+      renderRowsPanel();
+      setStatus('Row saved.');
+    }
+    async function deleteSelectedPage(){ if(state.selectedPageId){ await deleteDoc(state.selectedPageId); fillPageForm(); setStatus('Page deleted.'); } }
+    async function deleteSelectedPost(){ if(state.selectedPostId){ await deleteDoc(state.selectedPostId); fillPostForm(); setStatus('Post deleted.'); } }
+    async function deleteSelectedTable(){
+      if (!state.selectedTableId) return;
+      const rows = state.rows.filter(r => r.tableId === state.selectedTableId);
+      for (const row of rows) await deleteDoc(row.id);
+      await deleteDoc(state.selectedTableId);
+      fillTableForm();
+      setStatus('Table and related rows deleted.');
+    }
+    async function exportJson() {
+      const data = {
+        pages: state.pages, posts: state.posts, tables: state.tables, rows: state.rows,
+        settings: state.settings, theme: state.theme, admin: { ...(state.admin||{}), passwordHash:'[redacted]' }
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'genosdb-cms-export.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      setStatus('Export generated.');
+    }
+    function renderAll() {
+      if (!state.ready) return;
+      renderDashboard();
+      renderPages();
+      renderPosts();
+      renderTheme();
+      renderSettings();
+      renderTables();
+      renderPreview();
+    }
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      if (btn.dataset.section) return switchSection(btn.dataset.section);
+      if (btn.dataset.jump) { switchSection(btn.dataset.jump); return; }
+      if (btn.dataset.editPage) return fillPageForm(state.pages.find(x => x.id === btn.dataset.editPage));
+      if (btn.dataset.editPost) return fillPostForm(state.posts.find(x => x.id === btn.dataset.editPost));
+      if (btn.dataset.editTable) return fillTableForm(state.tables.find(x => x.id === btn.dataset.editTable));
+      if (btn.dataset.editRow) { state.editingRowId = btn.dataset.editRow; return renderRowsPanel(); }
+      if (btn.dataset.delRow) { await deleteDoc(btn.dataset.delRow); return setStatus('Row deleted.'); }
+      switch (btn.id) {
+        case 'loginBtn': return login();
+        case 'seedBtn': return seedDemoContent();
+        case 'logoutBtn': return logout();
+        case 'savePageBtn': return savePage();
+        case 'resetPageBtn': return fillPageForm();
+        case 'deletePageBtn': return deleteSelectedPage();
+        case 'savePostBtn': return savePost();
+        case 'resetPostBtn': return fillPostForm();
+        case 'deletePostBtn': return deleteSelectedPost();
+        case 'saveThemeBtn': return saveTheme();
+        case 'saveSettingsBtn': return saveSettings();
+        case 'saveAdminBtn': return saveAdmin();
+        case 'newTableBtn': return fillTableForm();
+        case 'saveTableBtn': return saveTable();
+        case 'resetTableBtn': return fillTableForm();
+        case 'deleteTableBtn': return deleteSelectedTable();
+        case 'addRowBtn': state.editingRowId = null; return renderRowsPanel();
+        case 'saveRowBtn': return saveRow();
+        case 'cancelRowEdit': state.editingRowId = null; return renderRowsPanel();
+        case 'exportBtn': return exportJson();
+      }
+    });
+    $('pageTitle').addEventListener('input', () => { if (!$('pageSlug').value.trim()) $('pageSlug').value = slugify($('pageTitle').value); });
+    $('postTitle').addEventListener('input', () => { if (!$('postSlug').value.trim()) $('postSlug').value = slugify($('postTitle').value); });
+    ['pageSearch','postSearch','tableSearch','rowFilter'].forEach(id => $(id).addEventListener('input', renderAll));
+    $('previewPageSelect').addEventListener('change', renderPreview);
+    await initDb();
+    await ensureDefaults();
+    await tryAutoLogin();
+    fillPageForm();
+    fillPostForm();
+    fillTableForm();
+    renderAll();
   </script>
 </body>
 </html>
